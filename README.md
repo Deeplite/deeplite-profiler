@@ -31,8 +31,6 @@ Use following command to install the package from our internal PyPI repository.
     $ pip install deeplite-profiler[`backend`]
 ```
 
-.. _profiler_install_source:
-
 ## Install from source
 
 ```
