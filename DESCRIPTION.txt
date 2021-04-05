@@ -1,0 +1,1 @@
+The `deeplite-profiler` package is a collection of metrics to profile a single deep learning or compare two different deep learning models. Supports `PyTorch` and `Tensorflow Keras` models, as backend.
