@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_namespace_packages
 
-with open('DESCRIPTION.md') as f:
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 with open('LICENSE.md') as f:
@@ -17,7 +19,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.1.1',
+    version='1.1.3',
     description='Profiler for deep learning models',
     long_description=long_description,
     long_description_content_type='text/markdown',

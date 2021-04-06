@@ -156,10 +156,10 @@ A list of different examples to use ``deeplite-profiler`` to profiler different 
 
 We always welcome community contributions to expand the scope of `deeplite-profiler` and also to have additional new metrics. Please refer to the [documentation](https://neutrino.deeplite.ai/documentation/profiler.html) for the detailed steps on how to design a new metrics. In general, we follow the `fork-and-pull` Git workflow.
 
- 1. **Fork** the repo on GitHub
- 2. **Clone** the project to your own machine
- 3. **Commit** changes to your own branch
- 4. **Push** your work back up to your fork
- 5. Submit a **Pull request** so that we can review your changes
+1. **Fork** the repo on GitHub
+2. **Clone** the project to your own machine
+3. **Commit** changes to your own branch
+4. **Push** your work back up to your fork
+5. Submit a **Pull request** so that we can review your changes
 
 NOTE: Be sure to merge the latest from "upstream" before making a pull request!
