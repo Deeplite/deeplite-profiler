@@ -17,7 +17,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.0.0',
+    version='1.1.0',
     description='Profiler for deep learning models',
     long_description=long_description,
     author='Deeplite',
