@@ -148,9 +148,9 @@ A list of different examples to use ``deeplite-profiler`` to profiler different 
 
 # Contribute a Custom Metric
 
-> **_NOTE:_**  If you looking for an SDK documentation, please head over here (#TODO).
+> **_NOTE:_**  If you looking for an SDK documentation, please head over [here](https://deeplite.github.io/deeplite-profiler/).
 
-We always welcome community contributions to expand the scope of `deeplite-profiler` and also to have additional new metrics. Please refer to the [documentation])(#link) (#TODO) for the detailed steps on how to design a new metrics. In general, we follow the `fork-and-pull` Git workflow.
+We always welcome community contributions to expand the scope of `deeplite-profiler` and also to have additional new metrics. Please refer to the [documentation])(https://deeplite.github.io/deeplite-profiler/) for the detailed steps on how to design a new metrics. In general, we follow the `fork-and-pull` Git workflow.
 
  1. **Fork** the repo on GitHub
  2. **Clone** the project to your own machine
