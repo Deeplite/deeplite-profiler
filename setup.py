@@ -24,7 +24,7 @@ setup(
     author_email="info@deeplite.ai",
     url="https://www.deeplite.ai",
     license=license,
-    packages=find_namespace_packages(exclude=('tests*', 'docs',)),
+    packages=find_namespace_packages(exclude=('tests*', 'docs',)) + ['.'],
     install_requires=["numpy>=1.17"],
     classifiers=[
         'Development Status :: 4 - Beta',
