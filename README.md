@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="deeplite-logo-color.png" />
+</p>
+
 [![Build Status](https://travis-ci.com/Deeplite/deeplite-profiler.svg?token=KrazyWqBHDFfVzGZSU9X&branch=master)](https://travis-ci.com/Deeplite/deeplite-profiler) [![codecov](https://codecov.io/gh/Deeplite/deeplite-profiler/branch/master/graph/badge.svg?token=D1RMWA1TDC)](https://codecov.io/gh/Deeplite/deeplite-profiler)
 
 # Deeplite Profiler
