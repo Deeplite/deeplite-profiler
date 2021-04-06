@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_namespace_packages
 
-with open('README.md') as f:
+with open('DESCRIPTION.md') as f:
     long_description = f.read()
 
 with open('LICENSE.md') as f:
