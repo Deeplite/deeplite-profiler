@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_namespace_packages
 
-with open('DESCRIPTION.txt') as f:
+with open('README.md') as f:
     long_description = f.read()
 
 with open('LICENSE.md') as f:
@@ -20,6 +20,7 @@ setup(
     version='1.1.0',
     description='Profiler for deep learning models',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Deeplite',
     author_email="info@deeplite.ai",
     url="https://www.deeplite.ai",
