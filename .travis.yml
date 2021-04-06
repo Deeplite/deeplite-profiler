@@ -41,6 +41,8 @@ deploy:
     username: "__token__"
     password: $PYPITOKEN
     skip_existing: true
+    distributions: "bdist_wheel"
+    #skip_cleanup: true
     on:
       branch: master
       tags: true
