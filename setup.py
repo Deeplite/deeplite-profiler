@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 from os import path
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'DESCRIPTION.md'), encoding='utf-8') as f:
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 with open('LICENSE') as f:
@@ -19,15 +19,15 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.1.4',
+    version='1.1.5',
     description='Profiler for deep learning models',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author='Deeplite',
-    author_email="info@deeplite.ai",
+    author_email="support@deeplite.ai",
     url="https://github.com/Deeplite/deeplite-profiler",
-    license=license,
-    packages=find_namespace_packages(exclude=('tests*', 'docs',)) + ['.'],
+    license='Apache 2.0',
+    packages=find_packages(exclude=('tests*', 'docs',)) + ['.'],
     install_requires=["numpy>=1.17"],
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -42,7 +42,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Operating System :: POSIX :: Linux',
         'Natural Language :: English',
-        'License :: Other/Proprietary License',
         'Environment :: Console'
     ],
     keywords='optimizer deep_neural_network deep_learning neural_architecture_search torch',
