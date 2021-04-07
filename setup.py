@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 from os import path
 this_directory = path.abspath(path.dirname(__file__))
@@ -27,7 +27,7 @@ setup(
     author_email="support@deeplite.ai",
     url="https://github.com/Deeplite/deeplite-profiler",
     license='Apache 2.0',
-    packages=find_packages(exclude=('tests*', 'docs',)) + ['.'],
+    packages=find_namespace_packages(exclude=('tests*', 'docs',)) + ['.'],
     install_requires=["numpy>=1.17"],
     classifiers=[
         'Development Status :: 4 - Beta',
