@@ -3,10 +3,10 @@ from setuptools import setup, find_namespace_packages
 
 from os import path
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+with open(path.join(this_directory, 'DESCRIPTION.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-with open('LICENSE.md') as f:
+with open('LICENSE') as f:
     license = f.read()
 
 EXTRAS_REQUIRE = {
@@ -19,13 +19,13 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.1.3',
+    version='1.1.4',
     description='Profiler for deep learning models',
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     author='Deeplite',
     author_email="info@deeplite.ai",
-    url="https://www.deeplite.ai",
+    url="https://github.com/Deeplite/deeplite-profiler",
     license=license,
     packages=find_namespace_packages(exclude=('tests*', 'docs',)) + ['.'],
     install_requires=["numpy>=1.17"],

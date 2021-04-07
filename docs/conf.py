@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'deeplite Profiler'
+project = 'Deeplite Profiler'
 copyright = '2020, Deeplite'
 author = 'Deeplite'
 

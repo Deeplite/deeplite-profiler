@@ -30,16 +30,16 @@ The `deeplite-profiler` package is a collection of metrics to profile a single d
 
 Use following command to install the package from our internal PyPI repository. 
 
-```
-    $ pip install --upgrade pip
-    $ pip install deeplite-profiler[`backend`]
+```console
+$ pip install --upgrade pip
+$ pip install deeplite-profiler[`backend`]
 ```
 
 ## Install from source
 
-```
-    $ git clone https://github.com/Deeplite/deeplite-profiler.git
-    $ pip install .[`backend`]
+```console
+$ git clone https://github.com/Deeplite/deeplite-profiler.git
+$ pip install .[`backend`]
 ```
 
 One can install specific ``backend`` modules, depending on the required framework and compute support. ``backend`` could be one of the following values
@@ -52,10 +52,10 @@ One can install specific ``backend`` modules, depending on the required framewor
 
 ## Install in Dev mode
 
-```
-    $ git clone https://github.com/Deeplite/deeplite-profiler.git
-    $ pip install -e .[`backend`]
-    $ pip install -r requirements-test.txt
+```console
+$ git clone https://github.com/Deeplite/deeplite-profiler.git
+$ pip install -e .[`backend`]
+$ pip install -r requirements-test.txt
 ```
 
 To test the installation, one can run the basic tests using `pytest` command in the root folder.
@@ -67,7 +67,7 @@ To test the installation, one can run the basic tests using `pytest` command in 
 
 ## For PyTorch Model
 
-```
+```python
 # Step 1: Define native pytorch dataloaders and model
 # 1a. data_splits = {"train": train_dataloder, "test": test_dataloader}
 data_splits = /* ... load iterable data loaders ... */
@@ -92,7 +92,7 @@ profiler.compare(profiler2, short_print=False, batch_size=1, device=Device.CPU, 
 
 ## For Tensorflow Model
 
-```
+```python
 # Step 1: Define native tensorflow dataloaders and model
 # 1a. data_splits = {"train": train_dataloder, "test": test_dataloader}
 data_splits = /* ... load iterable data loaders ... */
@@ -122,20 +122,20 @@ profiler.compare(profiler2, short_print=False, batch_size=1, device=Device.CPU, 
 
 An example output of the ``deeplite-profiler`` for ``resnet18`` model using the standard ``CIFAR100`` dataset using ``PyTorch`` backend, looks as follows
 
-```
-    +---------------------------------------------------------------+
-    |                    deeplite Model Profiler                    |
-    +-----------------------------------------+---------------------+
-    |             Param Name (Original Model) |                Value|
-    |                   Backend: TorchBackend |                     |
-    +-----------------------------------------+---------------------+
-    |                   Evaluation Metric (%) |              76.8295|
-    |                         Model Size (MB) |              42.8014|
-    |     Computational Complexity (GigaMACs) |               0.5567|
-    |             Total Parameters (Millions) |              11.2201|
-    |                   Memory Footprint (MB) |              48.4389|
-    |                     Execution Time (ms) |               2.6537|
-    +-----------------------------------------+---------------------+
+```console
++---------------------------------------------------------------+
+|                    deeplite Model Profiler                    |
++-----------------------------------------+---------------------+
+|             Param Name (Original Model) |                Value|
+|                   Backend: TorchBackend |                     |
++-----------------------------------------+---------------------+
+|                   Evaluation Metric (%) |              76.8295|
+|                         Model Size (MB) |              42.8014|
+|     Computational Complexity (GigaMACs) |               0.5567|
+|             Total Parameters (Millions) |              11.2201|
+|                   Memory Footprint (MB) |              48.4389|
+|                     Execution Time (ms) |               2.6537|
++-----------------------------------------+---------------------+
 ```
 
 - **Evaluation Metric:** Computed performance of the model on the given data
@@ -148,7 +148,6 @@ An example output of the ``deeplite-profiler`` for ``resnet18`` model using the 
 # Examples
 
 A list of different examples to use ``deeplite-profiler`` to profiler different PyTorch and TensorFlow models can be found [here](./examples) 
-
 
 # Contribute a Custom Metric
 
