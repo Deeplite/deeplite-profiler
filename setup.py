@@ -19,7 +19,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.1.5',
+    version='1.1.6',
     description='Profiler for deep learning models',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -37,11 +37,12 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',        
-        'Programming Language:: Python:: Implementation:: CPython',
+        'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Operating System :: POSIX :: Linux',
         'Natural Language :: English',
+        'License :: OSI Approved :: Apache Software License',
         'Environment :: Console'
     ],
     keywords='optimizer deep_neural_network deep_learning neural_architecture_search torch',
