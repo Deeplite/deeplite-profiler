@@ -43,11 +43,11 @@ $ pip install .[`backend`]
 ```
 
 One can install specific ``backend`` modules, depending on the required framework and compute support. ``backend`` could be one of the following values
-    - ``torch``: to install a ``torch`` specific profiler
-    - ``tf``: to install a ``TensorFlow`` specific profiler (this supports only CPU compute)
-    - ``tf-gpu``: to install a ``TensorFlow-gpu`` specific profiler (this supports both CPU and GPU compute)
-    - ``all``: to install both ``torch`` and ``TensorFlow`` specific profiler (this supports only CPU compute for TensorFlow)
-    - ``all-gpu``: to install both ``torch`` and ``TensorFlow-gpu`` specific profiler (for GPU environment) (this supports both CPU and GPU compute for TensorFlow)
+- ``torch``: to install a ``torch`` specific profiler
+- ``tf``: to install a ``TensorFlow`` specific profiler (this supports only CPU compute)
+- ``tf-gpu``: to install a ``TensorFlow-gpu`` specific profiler (this supports both CPU and GPU compute)
+- ``all``: to install both ``torch`` and ``TensorFlow`` specific profiler (this supports only CPU compute for TensorFlow)
+- ``all-gpu``: to install both ``torch`` and ``TensorFlow-gpu`` specific profiler (for GPU environment) (this supports both CPU and GPU compute for TensorFlow)
 
 
 ## Install in Dev mode
