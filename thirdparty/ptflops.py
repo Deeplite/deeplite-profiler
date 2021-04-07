@@ -331,7 +331,8 @@ def upsample_flops_counter_hook(module, input, output):
     summary["input_shape"] = get_input_shape(input)
     summary["input_shape"][0] = batch_size
     summary["output_shape"] = output_shape
-    summary["layer_weight_size"] = list(module.weight.size())
+    if hasattr(module, "weight") and hasattr(module.weight, "size"):
+        summary["layer_weight_size"] = list(module.weight.size())
     module.__hook_variables__.summary = summary
     global layer_count
     layer_count += 1
