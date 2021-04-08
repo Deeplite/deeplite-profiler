@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="deeplite-logo-color.png" />
+  <img src="https://github.com/Deeplite/deeplite-profiler/raw/master/deeplite-logo-color.png" />
 </p>
 
 [![Build Status](https://travis-ci.com/Deeplite/deeplite-profiler.svg?token=KrazyWqBHDFfVzGZSU9X&branch=master)](https://travis-ci.com/Deeplite/deeplite-profiler) [![codecov](https://codecov.io/gh/Deeplite/deeplite-profiler/branch/master/graph/badge.svg?token=D1RMWA1TDC)](https://codecov.io/gh/Deeplite/deeplite-profiler)
@@ -9,7 +9,7 @@
 The `deeplite-profiler` package is a collection of metrics to profile a single deep learning or compare two different deep learning models. Supports `PyTorch` and `Tensorflow Keras` models, as backend.
 
 <p align="center">
-  <img src="profiler.png" />
+  <img src="https://github.com/Deeplite/deeplite-profiler/raw/master/profiler.png" />
 </p>
 
 * [Installation](#Installation)
@@ -153,7 +153,7 @@ A list of different examples to use ``deeplite-profiler`` to profiler different 
 
 > **_NOTE:_**  If you looking for an SDK documentation, please head over [here](https://deeplite.github.io/deeplite-profiler/).
 
-We always welcome community contributions to expand the scope of `deeplite-profiler` and also to have additional new metrics. Please refer to the [documentation](https://neutrino.deeplite.ai/documentation/profiler.html) for the detailed steps on how to design a new metrics. In general, we follow the `fork-and-pull` Git workflow.
+We always welcome community contributions to expand the scope of `deeplite-profiler` and also to have additional new metrics. Please refer to the [documentation](https://docs.deeplite.ai/neutrino/profiler.html) for the detailed steps on how to design a new metrics. In general, we follow the `fork-and-pull` Git workflow.
 
 1. **Fork** the repo on GitHub
 2. **Clone** the project to your own machine
