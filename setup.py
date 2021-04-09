@@ -45,7 +45,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Environment :: Console'
     ],
-    keywords='optimizer deep_neural_network deep_learning neural_architecture_search torch',
+    keywords='profiler deep_neural_network deep_learning torch deeplite metrics',
     extras_require=EXTRAS_REQUIRE,
     include_package_data=True,
 )

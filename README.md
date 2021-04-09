@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="https://github.com/Deeplite/deeplite-profiler/raw/master/deeplite-logo-color.png" />
+  <img src="https://docs.deeplite.ai/neutrino/_static/content/deeplite-logo-color.png" />
 </p>
 
 [![Build Status](https://travis-ci.com/Deeplite/deeplite-profiler.svg?token=KrazyWqBHDFfVzGZSU9X&branch=master)](https://travis-ci.com/Deeplite/deeplite-profiler) [![codecov](https://codecov.io/gh/Deeplite/deeplite-profiler/branch/master/graph/badge.svg?token=D1RMWA1TDC)](https://codecov.io/gh/Deeplite/deeplite-profiler)
 
 # Deeplite Profiler
 
-The `deeplite-profiler` package is a collection of metrics to profile a single deep learning or compare two different deep learning models. Supports `PyTorch` and `Tensorflow Keras` models, as backend.
+To be able to use a deep learning model in research and production, it is essential to understand different performance metrics of the model beyond just the model's accuracy.  ``deeplite-profiler`` helps to easily and effectively measure the different performance metrics of a deep learning model. In addition to the existing metrics in the ``deeplite-profiler``, users could seamlessly contribute any custom metric to measure using the profiler. ``deeplite-profiler`` could also be used to compare the performance between two different deep learning models, for example, a teacher and a student model. ``deeplite-profiler`` currently supports PyTorch and TensorFlow Keras (v1) as two different backend frameworks.
 
 <p align="center">
-  <img src="https://github.com/Deeplite/deeplite-profiler/raw/master/profiler.png" />
+  <img src="https://docs.deeplite.ai/neutrino/_images/profiler.png" />
 </p>
 
 * [Installation](#Installation)
