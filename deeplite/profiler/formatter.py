@@ -55,7 +55,7 @@ def parse_metric(metric):
 def make_one_model_summary_str(status_dict, short_print=True, description_str='', summary_str='\n'):
     line_length, col1_length, col2_length = 63, 40, 20
     summary_str += "+" + "-" * line_length + "+" + "\n"
-    line_new = "|{:^{line_length}}|".format("deeplite Model Profiler", line_length=line_length)
+    line_new = "|{:^{line_length}}|".format("Deeplite Profiler", line_length=line_length)
     summary_str += line_new + "\n"
     summary_str += "+" + "-" * (col1_length + 1) + "+" + "-" * (col2_length + 1) + "+" + "\n"
     line_new = "|{:>{col1_length}} | {:>{col2_length}}|".format("Param Name (" + status_dict['name'] + ")",
@@ -93,7 +93,7 @@ def make_two_models_summary_str(status_dict, status_dict_2, short_print=True, de
                                 summary_str='\n'):
     line_length, col0_length, col1_length, col2_length, col3_length = 122, 40, 25, 25, 25
     summary_str += "+" + "-" * line_length + "+" + "\n"
-    line_new = "|{:^{line_length}}|".format("deeplite Model Profiler", line_length=line_length)
+    line_new = "|{:^{line_length}}|".format("Deeplite Profiler", line_length=line_length)
     summary_str += line_new + "\n"
     summary_str += "+" + "-" * (col0_length + 1) + "+" + "-" * (col1_length + 1) + "+" + "-" * (
             col2_length + 1) + "+" + "-" * (col2_length + 1) + "+" + "\n"
