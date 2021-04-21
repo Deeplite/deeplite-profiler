@@ -88,8 +88,8 @@ class Profiler(ABC):
                             sk_name))
                 if pf.overriding is False and override is False:
                     logger.warning(
-                        "Registered profiler function '{}' for status key '{}' is being overridden by '{}'",
-                        pf.function, status_keys, profiler_func)
+                        "Registered profiler function '{}' for status key '{}' is being overridden by '{}'".format(
+                        pf.function, status_keys, profiler_func))
                 elif pf.overriding is True and override is False:
                     continue
             self._profiling_functions_register[sk_name] = _ProfilerFunctionRegister(
