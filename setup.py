@@ -9,12 +9,13 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 with open('LICENSE') as f:
     license = f.read()
 
+TORCH_RANGE = "torch>=1.4, <=1.8.1"
 EXTRAS_REQUIRE = {
-    'torch': ["torch==1.4.0", "ptflops==0.6.2"],
+    'torch': [TORCH_RANGE, "ptflops==0.6.2"],
     'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'"],
     'tf': ["tensorflow==1.14; python_version <= '3.7.10'"],
-    'all': ["torch==1.4.0", "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'"],
-    'all-gpu': ["torch==1.4.0", "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'"],
+    'all': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'"],
+    'all-gpu': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'"],
 }
 
 setup(
