@@ -53,44 +53,11 @@ def summary_str_header_footer(model_name):
     
     return header, footer
 
-def get_model_complexity_info(model, input_res,
-                              print_per_layer_stat=True,
-                              as_strings=True,
-                              input_constructor=None, ost=sys.stdout,
-                              verbose=False, ignore_modules=[],
-                              custom_modules_hooks={}):
-    assert type(input_res) is tuple
-    assert len(input_res) >= 1
-    assert isinstance(model, nn.Module)
-    global CUSTOM_MODULES_MAPPING
-    CUSTOM_MODULES_MAPPING = custom_modules_hooks
-    flops_model = add_flops_counting_methods(model)
-    flops_model.eval()
-    flops_model.start_flops_count(ost=ost, verbose=verbose,
-                                  ignore_list=ignore_modules)
-    if input_constructor:
-        input = input_constructor(input_res)
-        _ = flops_model(**input)
-    else:
-        try:
-            batch = torch.ones(()).new_empty((1, *input_res),
-                                             dtype=next(flops_model.parameters()).dtype,
-                                             device=next(flops_model.parameters()).device)
-        except StopIteration:
-            batch = torch.ones(()).new_empty((1, *input_res))
 
-        _ = flops_model(batch)
-
-    flops_count, params_count = flops_model.compute_average_flops_cost()
-    #if print_per_layer_stat:
-    #    print_model_with_flops(flops_model, flops_count, params_count, ost=ost)
-    flops_model.stop_flops_count()
-    CUSTOM_MODULES_MAPPING = {}
-
-    if as_strings:
-        return flops_to_string(flops_count), params_to_string(params_count)
-
-    return flops_count, params_count
+class __Switch:
+    def __init__(self):
+        self.state = False
+corruption_warning_switch = __Switch()
 
 
 def flops_to_string(flops, units='GMac', precision=2):
@@ -209,6 +176,7 @@ def start_flops_count(self, **kwargs):
     """
     add_batch_counter_hook_function(self)
     self.all_modules = []
+    corruption_warning_switch.state = False
 
     def add_flops_counter_hook_function(module, ost, verbose, ignore_list):
         if type(module) in ignore_list:
@@ -292,22 +260,37 @@ def get_input_shape(input):
             input_shape = list(input[0][0].size())
     return input_shape
 
-def parse_output(o, activation_size):
+def _parse_output(o, activation_size):
     output_shape = []
     total_activations = []
     memory_footprint = []
+    corrupted = [False]
+
     def get_memory(oo):
         if isinstance(oo, (list, tuple)):
             for o_ in oo:
                 get_memory(o_)
-        else:
+        elif isinstance(oo, dict):
+            for o_ in oo.values():
+                get_memory(o_)
+        elif isinstance(oo, torch.Tensor):
             output_shape.append(list(oo.size()))
             total_activations.append(np.prod(oo.size()))
             memory_footprint.append(np.prod(oo.size()) * activation_size)
+        else:
+            corrupted[0] = True
 
     get_memory(o)
+    return total_activations, memory_footprint, output_shape, corrupted[0]
+
+def parse_module_output(module, output, activation_size):
+    total_activations, memory_footprint, output_shape, corrupted = _parse_output(output, activation_size)
+    if corrupted and corruption_warning_switch.state is False:
+        print("Warning!! cannot parse module '{}' output types, memory footprint value is potentially".format(module) +\
+              " underestimated and output shapes corrupted")
+        corruption_warning_switch.state = True
     return total_activations, memory_footprint, output_shape
-    
+
 
 def upsample_flops_counter_hook(module, input, output):
     activation_size = 4
@@ -317,7 +300,7 @@ def upsample_flops_counter_hook(module, input, output):
     for val in output_size.shape[1:]:
         output_elements_count *= val
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     module.__hook_variables__ = HookVariables() # write fi else
     module.__hook_variables__.mac += int(output_elements_count)
@@ -342,7 +325,7 @@ def no_flops_ops_counter_hook(module, input, output):
     #batch_size = output.shape[0]
     #active_elements_count = output.numel()
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.activations += sum(total_activations)
@@ -364,7 +347,7 @@ def relu_flops_counter_hook(module, input, output):
     batch_size = output.shape[0]
     active_elements_count = output.numel()
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.mac += int(active_elements_count)
@@ -394,7 +377,7 @@ def linear_flops_counter_hook(module, input, output):
     batch_size = output.shape[0]
     bias_flops = output_last_dim if module.bias is not None else 0
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
     
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.mac += int(np.prod(input.shape) * output_last_dim + bias_flops)
@@ -422,7 +405,7 @@ def pool_flops_counter_hook(module, input, output):
     activation_size = 4
     batch_size = output.shape[0]
     input = input[0]
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     
     module.__hook_variables__ = HookVariables()
@@ -455,7 +438,7 @@ def bn_flops_counter_hook(module, input, output):
     if module.affine:
         batch_flops *= 2
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.mac += int(batch_flops)
@@ -508,7 +491,7 @@ def conv_flops_counter_hook(module, input, output):
     overall_flops = overall_conv_flops + bias_flops
     num_out_elements = output.numel()
 
-    total_activations, memory_footprint, output_shape = parse_output(output, activation_size)
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.mac += int(overall_flops) 
