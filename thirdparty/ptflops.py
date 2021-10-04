@@ -248,17 +248,13 @@ def get_m_key(name):
     return m_key
 
 def get_input_shape(input):
-    if len(input) == 0:
-        #logger.warning("'%s' empty input tuple detected in hook for model size, size could be wrong" % m_key)
-        print("empty input tuple detected in hook for model size, size could be wrong")
-        input_shape = [0]
-    else:
-        try:
-           input_shape = list(input[0].size())
-        except:
-            # If a merge happens between a module and identity and the input is a tuple(tuple)
-            input_shape = list(input[0][0].size())
-    return input_shape
+    # note: this is done really just for the summary so it is safe to return dummy values
+    if isinstance(input, (list, tuple)) and len(input) == 1:
+        return list(input[0].size())
+    if isinstance(input, torch.Tensor):
+        return list(input.size())
+    # print("unknown input tuple detected in hook for model size, size could be wrong")
+    return [0]
 
 def _parse_output(o, activation_size):
     output_shape = []
