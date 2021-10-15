@@ -517,7 +517,7 @@ def generic_flops_counter_hook(module, input, output):
     try:
         rval = module.compute_module_complexity(input, output)
     except AttributeError:
-        raise TypeError("Wrong flops hook, module '{}' does not have 'compute_module_complexity' method")
+        raise TypeError("Wrong flops hook, module '{}' does not have 'compute_module_complexity' method".format(module))
 
     try:
         flops = rval['flops']
@@ -526,8 +526,8 @@ def generic_flops_counter_hook(module, input, output):
         params = rval.get('params', None)
         assert flops is not None
     except (AssertionError, TypeError, KeyError):
-        raise RuntimeError("Module '{}'.compute_module_complexity should return a dict with keys "
-                           "'flops', 'param_size', 'activation_size' and 'params'. 'flops' should be not None.")
+        raise RuntimeError("Module '{}'.compute_module_complexity should return a dict with keys ".format(module) + \
+                           "'flops', 'param_size', 'activation_size' and 'params'. 'flops' should not be None.")
 
     total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
@@ -620,8 +620,6 @@ MODULES_MAPPING = {
     nn.ConvTranspose1d: conv_flops_counter_hook,
     nn.ConvTranspose2d: conv_flops_counter_hook,
     nn.ConvTranspose3d: conv_flops_counter_hook,
-
-    
 }
 
 
