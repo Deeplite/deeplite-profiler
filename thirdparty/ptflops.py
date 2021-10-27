@@ -182,10 +182,14 @@ def start_flops_count(self, **kwargs):
         if type(module) in ignore_list:
             if is_supported_instance(module):
                 module.__hook_variables__ = HookVariables()
+        if hasattr(module, 'compute_module_complexity'):
+            handle = module.register_forward_hook(generic_flops_counter_hook)
+            module.__flops_handle__ = handle
+            self.all_modules.append(module)
         elif is_supported_instance(module):
             if hasattr(module, '__flops_handle__'):
                 return
-            if type(module) in CUSTOM_MODULES_MAPPING:
+            elif type(module) in CUSTOM_MODULES_MAPPING:
                 handle = module.register_forward_hook(
                                         CUSTOM_MODULES_MAPPING[type(module)])
             else:
@@ -403,7 +407,6 @@ def pool_flops_counter_hook(module, input, output):
     input = input[0]
     total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
 
-    
     module.__hook_variables__ = HookVariables()
     module.__hook_variables__.mac += int(np.prod(input.shape))
     module.__hook_variables__.activations += sum(total_activations)
@@ -458,7 +461,6 @@ def bn_flops_counter_hook(module, input, output):
     global layer_count
     layer_count += 1
 
-
 def conv_flops_counter_hook(module, input, output):
     # Can have multiple inputs, getting the first one
     param_size = 4
@@ -510,6 +512,47 @@ def conv_flops_counter_hook(module, input, output):
     module.__hook_variables__.summary = summary
     global layer_count
     layer_count += 1
+
+def generic_flops_counter_hook(module, input, output):
+    try:
+        rval = module.compute_module_complexity(input, output)
+    except AttributeError:
+        raise TypeError("Wrong flops hook, module '{}' does not have 'compute_module_complexity' method".format(module))
+
+    try:
+        flops = rval['flops']
+        param_size = rval.get('param_size', 4)
+        activation_size = rval.get('activation_size', 4)
+        params = rval.get('params', None)
+        assert flops is not None
+    except (AssertionError, TypeError, KeyError):
+        raise RuntimeError("Module '{}'.compute_module_complexity should return a dict with keys ".format(module) + \
+                           "'flops', 'param_size', 'activation_size' and 'params'. 'flops' should not be None.")
+
+    total_activations, memory_footprint, output_shape = parse_module_output(module, output, activation_size)
+
+    module.__hook_variables__ = HookVariables()
+    module.__hook_variables__.mac += int(flops)
+    module.__hook_variables__.params += sum(p.numel() for p in module.parameters() if p.requires_grad) if params is None else params
+    module.__hook_variables__.activations += sum(total_activations)
+    module.__hook_variables__.model_size += module.__hook_variables__.params * param_size
+    module.__hook_variables__.memory_footprint += sum(memory_footprint)
+
+    m_key = get_m_key(module.__class__)
+    summary = OrderedDict()
+    summary["m_key"] = m_key
+    summary['layer_time'] = time.time()
+    summary["input_shape"] = get_input_shape(input)
+    # summary["input_shape"][0] = batch_size
+    summary["output_shape"] = output_shape
+    if hasattr(module, "weight") and hasattr(module.weight, "size"):
+        summary["layer_weight_size"] = list(module.weight.size())
+    if hasattr(module, "bias") and hasattr(module.bias, "size"):
+        summary["layer_bias_size"] = list(module.bias.size())
+    module.__hook_variables__.summary = summary
+    global layer_count
+    layer_count += 1
+
 
 def add_batch_counter_variables_or_reset(module):
     module.__batch_counter__ = 0
@@ -577,8 +620,6 @@ MODULES_MAPPING = {
     nn.ConvTranspose1d: conv_flops_counter_hook,
     nn.ConvTranspose2d: conv_flops_counter_hook,
     nn.ConvTranspose3d: conv_flops_counter_hook,
-
-    
 }
 
 
