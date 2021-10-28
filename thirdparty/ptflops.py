@@ -253,10 +253,13 @@ def get_m_key(name):
 
 def get_input_shape(input):
     # note: this is done really just for the summary so it is safe to return dummy values
-    if isinstance(input, (list, tuple)) and len(input) == 1:
-        return list(input[0].size())
-    if isinstance(input, torch.Tensor):
-        return list(input.size())
+    try:
+        if isinstance(input, (list, tuple)) and len(input) == 1:
+            return list(input[0].size())
+        if isinstance(input, torch.Tensor):
+            return list(input.size())
+    except:
+        pass
     # print("unknown input tuple detected in hook for model size, size could be wrong")
     return [0]
 
