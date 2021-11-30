@@ -13,7 +13,7 @@ from deeplite.profiler.formatter import getLogger
 
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
 

@@ -10,7 +10,7 @@ from .formatter import getLogger, make_one_model_summary_str, make_two_models_su
 from .metrics import EvalMetric, InferenceTime, Comparative
 from .utils import cast_tuple
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 _ProfilerFunctionRegister = namedtuple("_ProfilerFunctionRegister", ('function', 'overriding', 'status'),
                                        module=__name__)
