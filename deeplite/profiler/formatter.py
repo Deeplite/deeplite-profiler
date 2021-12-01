@@ -34,10 +34,9 @@ class _LoggerHolder:
         self._logger.debug("Profiler's logger set to {}".format(new_logger))
 
     def __getattribute__(self, item):
-        logger = object.__getattribute__(self, '_logger')
-        if item == '_logger':
-            return logger
-        return getattr(logger, item)
+        if item in ('logger', '_logger'):
+            return object.__getattribute__(self, item)
+        return getattr(self.logger, item)
 _logger_holder = _LoggerHolder()
 
 
