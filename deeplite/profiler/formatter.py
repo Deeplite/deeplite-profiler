@@ -1,22 +1,57 @@
 from collections import OrderedDict
 import logging
-import sys
 
 from .metrics import Comparative, compare_status_values, Metric
 
 
-def getLogger():
-    nroot = logging.RootLogger(logging.DEBUG)
-    consol_level = logging.DEBUG
+class _LoggerHolder:
+    """
+    Holds the logger for the profiler module and redirect any calls made to its held logger. If none is held
+    then defaults to logging.getLogger('deeplite_profiler'). This allows customization of the logging
+    being used in the profiler by an external library by importing setLogger.
+    """
+    __singleton = False
 
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(consol_level)
-    nroot.addHandler(console_handler)
+    def __new__(cls, *args, **kwargs):
+        if cls.__singleton:
+            raise TypeError("This class is a singleton!")
+        cls.__singleton = True
+        return super().__new__(cls)
 
-    return nroot
+    def __init__(self):
+        self._logger = None
+
+    @property
+    def logger(self):
+        if self._logger is None:
+            self._logger = logging.getLogger('deeplite_profiler')
+            self._logger.debug("Defaulting to logging.getLogger('deeplite_profiler')'s logger")
+        return self._logger
+
+    @logger.setter
+    def logger(self, new_logger):
+        self._logger = new_logger
+        self._logger.debug("Profiler's logger set to {}".format(new_logger))
+
+    def __getattribute__(self, item):
+        if item in ('logger', '_logger'):
+            return object.__getattribute__(self, item)
+        return getattr(self.logger, item)
+_logger_holder = _LoggerHolder()
 
 
-logger = getLogger()
+# silence the name for now
+def getLogger(name=None):
+    """
+    Returns an instance of _LoggerHolder. Even though the name is misleading, any code using this return value
+    should use it as if it was a logger. This enables to dynamically change the logger of the library after
+    the modules were loaded and their logger declared in their headers.
+    """
+    return _logger_holder
+
+
+def setLogger(logger):
+    _logger_holder.logger = logger
 
 
 class NotComputedValue:

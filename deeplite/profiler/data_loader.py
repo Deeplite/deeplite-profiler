@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from .formatter import getLogger
 from .utils import timer, Device
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 
 class DataLoader(ABC):
