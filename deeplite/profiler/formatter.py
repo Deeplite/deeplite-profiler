@@ -40,8 +40,13 @@ class _LoggerHolder:
 _logger_holder = _LoggerHolder()
 
 
+# silence the name for now
 def getLogger(name=None):
-    # silence the name for now
+    """
+    Returns an instance of _LoggerHolder. Even though the name is misleading, any code using this return value
+    should use it as if it was a logger. This enables to dynamically change the logger of the library after
+    the modules were loaded and their logger declared in their headers.
+    """
     return _logger_holder
 
 
