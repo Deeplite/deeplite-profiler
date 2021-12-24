@@ -28,7 +28,10 @@ setup(
     author_email="support@deeplite.ai",
     url="https://github.com/Deeplite/deeplite-profiler",
     license='Apache 2.0',
-    packages=find_namespace_packages(exclude=('tests*', 'docs',)) + ['.'],
+    packages=find_namespace_packages(exclude=('tests*', 'docs',)),
+    package_data={
+    'deeplite': ['deeplite-profiler.sig'],
+    },
     install_requires=["numpy>=1.17"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
