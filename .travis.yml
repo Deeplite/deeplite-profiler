@@ -30,6 +30,7 @@ script:
   - codecov
 
 before_deploy:
+  - python3 -m pip install cryptography==3.4.6
   - python3 -m pip install -U s3pypi
   - python3 -m pip install twine
   - python3 -m pip install cibuildwheel==1.10.0
