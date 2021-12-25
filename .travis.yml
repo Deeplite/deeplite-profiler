@@ -82,6 +82,6 @@ deploy:
 env:
   global:
     - CIBW_BUILD_VERBOSITY=1
-    - CIBW_BEFORE_BUILD="pip install -U Cython && python setup.py build_ext --inplace"
+    - CIBW_BEFORE_BUILD="pip install --upgrade pip && pip uninstall -y deeplite-profiler && rm -rf build/ &&  pip install -U Cython && python setup.py build_ext --inplace && python sign_package.py"
     - TWINE_USERNAME="__token__"
     - TWINE_PASSWORD=$PYPITOKEN
