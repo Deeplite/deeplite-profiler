@@ -85,5 +85,6 @@ env:
 
     # passing env variables to cibuildwheel container is problemtic, so we have to keep CIBW_BEFORE_BUILD hidden to export secret variables.
     #- CIBW_BEFORE_BUILD="export env1=xxx && pip install --upgrade pip && pip uninstall -y deeplite-profiler && rm -rf build/ &&  pip install cryptography==3.4.6 && pip install -U Cython && python setup.py build_ext --inplace && python sign_package.py"
+    - CIBW_BEFORE_BUILD=$SECRET_CIBW_BEFORE_BUILD
     - TWINE_USERNAME="__token__"
     - TWINE_PASSWORD=$PYPITOKEN
