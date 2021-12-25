@@ -14,6 +14,7 @@ def generate_checksum(fname, block_size=4096):
 
 
 deeplite_key = os.getenv("DEEPLITE_KEY", "12345681234568123456812345681234")
+print("Deeplite key {}".format(deeplite_key))
 
 def generate_signature(package_root):
    sums = []
