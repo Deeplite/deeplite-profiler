@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractstaticmethod
 from enum import Enum
 
 __all__ = ["Comparative", "LayerwiseSummary", "Flops", "ModelSize", "ExecutionTime", "TotalParams",
@@ -54,15 +54,13 @@ class Metric(StatusKey):
     Most of the methods are used to properly format `Metric` when displaying them and comparing them.
     """
 
-    @staticmethod
-    @abstractmethod
+    @abstractstaticmethod
     def description():
         """
         String description of what this metric is supposed to have computed
         """
 
-    @staticmethod
-    @abstractmethod
+    @abstractstaticmethod
     def friendly_name():
         """
         String friendly human recognizable name for this metric

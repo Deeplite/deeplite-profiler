@@ -13,7 +13,7 @@ def generate_checksum(fname, block_size=4096):
     return hash.hexdigest()
 
 
-deeplite_key = os.getenv("DEEPLITE_KEY", "1234568123456812345681234568")
+deeplite_key = os.getenv("DEEPLITE_KEY", "12345681234568123456812345681234")
 
 def generate_signature(package_root):
    sums = []
@@ -24,6 +24,8 @@ def generate_signature(package_root):
             sums.append(generate_checksum(os.path.join(path,filename)))
             if not build_path:
                build_path = path
+               build_path = build_path.split("deeplite", 1)[0]
+
    signature =  ",".join(sums)
    f = Fernet(base64.urlsafe_b64encode(deeplite_key.encode("utf-8")))
    signature = f.encrypt(signature.encode("utf-8"))
@@ -34,7 +36,7 @@ def generate_signature(package_root):
 
 
 def write_signature(sig, build_path):
-   sig_file_name = os.path.join(build_path,"deeplite-profiler.sig")
+   sig_file_name = os.path.join(build_path,"deeplite/deeplite-profiler.sig")
    sig_file = open(sig_file_name, "w")
    n = sig_file.write(sig)
    sig_file.close()   
