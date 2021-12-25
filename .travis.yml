@@ -82,7 +82,7 @@ deploy:
 env:
   global:
     - CIBW_BUILD_VERBOSITY=1
-    - CIBW_ENVIRONMENT_PASS_LINUX = DEEPLITE_KEY
-    - CIBW_BEFORE_BUILD="pip install --upgrade pip && pip uninstall -y deeplite-profiler && rm -rf build/ &&  pip install cryptography==3.4.6 && pip install -U Cython && python setup.py build_ext --inplace && python sign_package.py"
+    - CIBW_ENVIRONMENT_PASS_LINUX = "DEEPLITE_KEY"
+    - CIBW_BEFORE_BUILD="export DLTEST=123 && pip install --upgrade pip && pip uninstall -y deeplite-profiler && rm -rf build/ &&  pip install cryptography==3.4.6 && pip install -U Cython && python setup.py build_ext --inplace && python sign_package.py"
     - TWINE_USERNAME="__token__"
     - TWINE_PASSWORD=$PYPITOKEN
