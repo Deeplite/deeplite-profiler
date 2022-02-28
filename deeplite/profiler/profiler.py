@@ -276,13 +276,13 @@ class Profiler(ABC):
                 logger.debug(layerwise_summary_2.value)
         getattr(logger, print_mode.lower())(summary_str)
 
-    def clone(self, model=None, data_splits=None):
+    def clone(self, model=None, data_splits=None, retain_status=False):
         # create a new instance instead of deepcopying stuff
         model = self.model if not model else model
         data_splits = self.data_splits if not data_splits else data_splits
         new = type(self)(model, data_splits)
         new._profiling_functions_register = deepcopy(self._profiling_functions_register)
-        if new.model is not self.model:
+        if not retain_status and new.model is not self.model:
             new.reset_status()
         new.backend = self.backend
         return new
