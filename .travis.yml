@@ -7,7 +7,7 @@ jobs:
       env: CIBW_BUILD="cp36-manylinux_x86_64"
 
     - services: docker
-      python: 3.7
+      python: 3.7.9
       env: CIBW_BUILD="cp37-manylinux_x86_64"
 
     - services: docker
@@ -31,7 +31,7 @@ script:
 
 before_deploy:
   - python3 -m pip install markupsafe==2.0.1  
-  - python3 -m pip install -U s3pypi
+  - python3 -m pip install s3pypi==0.11.1
   - python3 -m pip install twine
   - python3 -m pip install cibuildwheel==1.10.0
   - python3 -m cibuildwheel --archs x86_64 --output-dir  wheelhouse
