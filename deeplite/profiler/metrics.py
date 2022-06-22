@@ -217,6 +217,31 @@ class EvalMetric(Metric):
         return self.comparative
 
 
+class DynamicEvalMetric(Metric):
+    def __init__(self, name, unit_name='', comparative=Comparative.DIFF):
+        super().__init__()
+        self._name = name
+        self.unit_name = unit_name
+        self.comparative = comparative
+
+    @property
+    def NAME(self):
+        return self._name
+
+    @staticmethod
+    def description():
+        return "Computed performance of the model on the given data"
+
+    def friendly_name(self):
+        return "Evaluation Metric: " + self.NAME
+
+    def get_units(self):
+        return self.unit_name
+
+    def get_comparative(self):
+        return self.comparative
+
+
 class InferenceTime(Metric):
     NAME = 'inference_time'
 
