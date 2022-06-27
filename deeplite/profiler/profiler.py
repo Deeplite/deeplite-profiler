@@ -197,7 +197,6 @@ class Profiler(ABC):
         for sk in self.status_keys():
             if self.status_get(sk) is not None:
                 continue
-            # breakpoint()
             self.compute_status(sk, recompute=recompute, **kwargs)
 
         if print_mode:
