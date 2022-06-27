@@ -233,7 +233,7 @@ class DynamicEvalMetric(Metric):
         return "Computed performance of the model on the given data"
 
     def friendly_name(self):
-        return "Evaluation Metric: " + self.NAME
+        return "Eval: " + self.NAME
 
     def get_units(self):
         return self.unit_name
