@@ -63,10 +63,10 @@ with open('LICENSE') as f:
 TORCH_RANGE = "torch>=1.4, <=1.8.1"
 EXTRAS_REQUIRE = {
     'torch': [TORCH_RANGE, "ptflops==0.6.2"],
-    'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.20.*"],
-    'tf': ["tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.20.*"],
-    'all': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.20.*"],
-    'all-gpu': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.20.*"],
+    'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'tf': ["tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'all': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'all-gpu': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
 }
 
 setup(
