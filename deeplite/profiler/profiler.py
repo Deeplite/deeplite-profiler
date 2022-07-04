@@ -437,10 +437,11 @@ class ComputeEvalMetric(ExternalProfilerFunction):
         split = split if split else self.default_split
         return super().pipe_kwargs_to_call(model, data_splits[split], kwargs)
 
-    def add_secondary_metric(self, key, unit_name=None, comparative=None):
+    def add_secondary_metric(self, key, unit_name=None, description=None, comparative=None):
         unit = self.unit_name if unit_name is None else unit_name
         comp = self.comparative if comparative is None else comparative
-        self.secondary_metrics.append(DynamicEvalMetric(name=key, unit_name=unit, comparative=comp))
+        new_metric = DynamicEvalMetric(key, unit_name=unit, description=description, comparative=comp)
+        self.secondary_metrics.append(new_metric)
 
     def __call__(self, *args, **kwargs):
         start = time.time()

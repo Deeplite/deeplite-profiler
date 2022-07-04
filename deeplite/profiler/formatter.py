@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import logging
 
-from .metrics import Comparative, compare_status_values, Metric
+from .metrics import Comparative, compare_status_values, Metric, DynamicEvalMetric
 
 
 class _LoggerHolder:
@@ -208,7 +208,8 @@ def default_display_filter_function(status_dict):
 
     Remove 'Inference Time' as it is not a super relevant metric to display
     """
-    order = ('eval_metric', 'model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time')
+    order = ('eval_metric',) + tuple(DynamicEvalMetric.REGISTRY)
+    order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time')
     leftovers = tuple(set(status_dict.keys()) - set(('inference_time',) + order))
     order = order + leftovers
 

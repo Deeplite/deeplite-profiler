@@ -102,9 +102,10 @@ class TestTorchProfiler(BaseFunctionalTest):
         dummy_eval = DictReturnEval()
         eval_profiler = ComputeEvalMetric(dummy_eval, 'acc', unit_name='%')
         eval_profiler.add_secondary_metric('b')
-        eval_profiler.add_secondary_metric('c', 'ms', Comparative.DIV)
+        eval_profiler.add_secondary_metric('c', 'ms', 'milliseconds', Comparative.DIV)
         profiler.register_profiler_function(eval_profiler, override=True)
         profiler.compute_status('eval_metric')
+        profiler.display_status()
         assert profiler.status_get('eval_metric') == rval['acc']
         assert profiler.status_get('b') == rval['b']
         assert profiler.status_get('c') == rval['c']
