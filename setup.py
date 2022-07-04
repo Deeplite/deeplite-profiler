@@ -63,10 +63,10 @@ with open('LICENSE') as f:
 TORCH_RANGE = "torch>=1.4, <=1.8.1"
 EXTRAS_REQUIRE = {
     'torch': [TORCH_RANGE, "ptflops==0.6.2"],
-    'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'"],
-    'tf': ["tensorflow==1.14; python_version <= '3.7.10'"],
-    'all': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'"],
-    'all-gpu': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'"],
+    'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'tf': ["tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'all': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
+    'all-gpu': [TORCH_RANGE, "ptflops==0.6.2", "tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.19.*"],
 }
 
 setup(
@@ -91,7 +91,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',        
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries :: Python Modules',

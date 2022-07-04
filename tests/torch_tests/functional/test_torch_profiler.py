@@ -1,5 +1,9 @@
 import pytest
 from copy import deepcopy
+
+from deeplite.profiler.evaluate import EvaluationFunction
+from deeplite.profiler import ComputeEvalMetric
+from deeplite.profiler.metrics import Comparative
 from tests.torch_tests.functional import BaseFunctionalTest, TORCH_AVAILABLE, MODEL, get_profiler
 from unittest import mock
 
@@ -88,6 +92,20 @@ class TestTorchProfiler(BaseFunctionalTest):
         assert all(v1 == v2 for (k1, v1), (k2, v2) in zip(profiler.status_items(), profiler2.status_items())
                    if k1 not in ('layerwise_summary', 'inference_time', 'execution_time'))
 
+    def test_secondary_eval_override(self, *args):
+        profiler = get_profiler()
+        rval = {'acc': 1, 'b': 2, 'c': 4}
+        class DictReturnEval(EvaluationFunction):
+            def __call__(self, model, loader):
+                return rval
 
-
-
+        dummy_eval = DictReturnEval()
+        eval_profiler = ComputeEvalMetric(dummy_eval, 'acc', unit_name='%')
+        eval_profiler.add_secondary_metric('b')
+        eval_profiler.add_secondary_metric('c', 'ms', 'milliseconds', Comparative.DIV)
+        profiler.register_profiler_function(eval_profiler, override=True)
+        profiler.compute_status('eval_metric')
+        profiler.display_status()
+        assert profiler.status_get('eval_metric') == rval['acc']
+        assert profiler.status_get('b') == rval['b']
+        assert profiler.status_get('c') == rval['c']

@@ -217,6 +217,39 @@ class EvalMetric(Metric):
         return self.comparative
 
 
+class DynamicEvalMetric(Metric):
+    REGISTRY = []
+
+    def __init__(self, name, unit_name='', description=None, comparative=Comparative.DIFF):
+        super().__init__()
+        self._name = name
+        self.unit_name = unit_name
+        if description and isinstance(description, str):
+            self._description = description
+        else:
+            self._description = "Computed performance of the model on the given data"
+        self.comparative = comparative
+
+        if name not in self.REGISTRY:
+            self.REGISTRY.append(name)
+
+    @property
+    def NAME(self):
+        return self._name
+
+    def description(self):
+        return self._description
+
+    def friendly_name(self):
+        return "Eval: " + self.NAME
+
+    def get_units(self):
+        return self.unit_name
+
+    def get_comparative(self):
+        return self.comparative
+
+
 class InferenceTime(Metric):
     NAME = 'inference_time'
 
