@@ -1,15 +1,28 @@
 language: python
-python:
-  - "3.6"      # current default Python on Travis CI
-  - "3.7"
-  - "3.8"
-  
+jobs:
+  include:
+    # perform a linux build
+    - services: docker
+      python: 3.6
+      env: CIBW_BUILD="cp36-manylinux_x86_64"
+
+    - services: docker
+      python: 3.7.9
+      env: CIBW_BUILD="cp37-manylinux_x86_64"
+
+    - services: docker
+      python: 3.8
+      env: CIBW_BUILD="cp38-manylinux_x86_64"
+
+# command to install dependencies
+before_install:
+  - python3 -m pip install --upgrade pip
+
 # command to install dependencies
 install:
-  - python -m pip install --upgrade pip
-  - pip install -r requirements-test.txt
+  - python3 -m pip install -r requirements-test.txt
   - pip install .[all]
-  - pip install codecov
+  - python3 -m pip install codecov
   
 # command to run tests
 script:
@@ -17,24 +30,46 @@ script:
   - codecov
 
 before_deploy:
-  - python setup.py bdist_wheel
-  - pip install -U s3pypi
+  - python3 -m pip install markupsafe==2.0.1  
+  - python3 -m pip install s3pypi==0.11.1
+  - python3 -m pip install twine
+  - python3 -m pip install cibuildwheel==1.10.0
+  - python3 -m cibuildwheel --archs x86_64 --output-dir  wheelhouse
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - make -C docs html
 
 deploy:
+  # Prod deployment
   - provider: releases
     token: $GITHUB_TOKEN
     skip_cleanup: true
     name: v$TRAVIS_TAG
     overwrite: true
     file_glob: true
-    file: dist/*
+    file: wheelhouse/*
     on:
       branch: master
       tags: true
       condition: "$TRAVIS_TAG =~ -release$"
+
+  # Prod deployment
+  - provider: script # PyPi
+    script: python3 -m twine upload --skip-existing wheelhouse/*.whl
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+      condition: "$TRAVIS_TAG =~ -release$"
+
+  #Stage deployment
+  - provider: script
+    script: s3pypi --bucket $AWS_BUCKET --region $AWS_REGION --force --private --no-sdist --dist-path wheelhouse --secret deeplite-stage
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+      condition: "$TRAVIS_TAG =~ -stage$"
 
   - provider: pages
     skip_cleanup: true
@@ -45,23 +80,10 @@ deploy:
       tags: true
       condition: "$TRAVIS_TAG =~ -release$"
 
-  # Prod deployment
-  - provider: pypi
-    username: "__token__"
-    password: $PYPITOKEN
-    skip_existing: true
-    distributions: "bdist_wheel"
-    #skip_cleanup: true
-    on:
-      branch: master
-      tags: true
-      condition: "$TRAVIS_TAG =~ -release$"
-
-  #Stage deployment
-  - provider: script
-    script: s3pypi --bucket $AWS_BUCKET --region $AWS_REGION --force --private --no-sdist --dist-path dist --secret deeplite-stage
-    skip_cleanup: true
-    on:
-      branch: master
-      tags: true
-      condition: "$TRAVIS_TAG =~ -stage$"
+env:
+  global:
+    - CIBW_BUILD_VERBOSITY=-3
+    - CIBW_BEFORE_BUILD="pip install --upgrade pip && pip uninstall -y deeplite-profiler && rm -rf build/ &&  pip install cryptography==3.4.6 && pip install -U Cython && python setup.py build_ext --inplace && python sign_package.py"
+    - CIBW_ENVIRONMENT=$SECRET_CIBW_ENV
+    - TWINE_USERNAME="__token__"
+    - TWINE_PASSWORD=$PYPITOKEN

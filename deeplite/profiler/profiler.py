@@ -7,10 +7,10 @@ import time
 from .evaluate import EvaluationFunction
 from .formatter import getLogger, make_one_model_summary_str, make_two_models_summary_str, \
     default_display_filter_function
-from .metrics import EvalMetric, InferenceTime, Comparative
+from .metrics import EvalMetric, DynamicEvalMetric, InferenceTime, Comparative
 from .utils import cast_tuple
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 _ProfilerFunctionRegister = namedtuple("_ProfilerFunctionRegister", ('function', 'overriding', 'status'),
                                        module=__name__)
@@ -276,13 +276,13 @@ class Profiler(ABC):
                 logger.debug(layerwise_summary_2.value)
         getattr(logger, print_mode.lower())(summary_str)
 
-    def clone(self, model=None, data_splits=None):
+    def clone(self, model=None, data_splits=None, retain_status=False):
         # create a new instance instead of deepcopying stuff
         model = self.model if not model else model
         data_splits = self.data_splits if not data_splits else data_splits
         new = type(self)(model, data_splits)
         new._profiling_functions_register = deepcopy(self._profiling_functions_register)
-        if new.model is not self.model:
+        if not retain_status and new.model is not self.model:
             new.reset_status()
         new.backend = self.backend
         return new
@@ -412,6 +412,10 @@ class ComputeEvalMetric(ExternalProfilerFunction):
 
     This makes the additional assumption that an evaluation function is defined only on one split (
     or one data loader)
+
+    If the evaluation function returns a dict, this class can return secondary metrics from that dict.
+    For each key corresponding to a desired metric, call :meth:`add_secondary_metrics` with that key.
+    Optionally include the metric's unit_name and comparative if different from the eval_metric's
     """
 
     def __init__(self, func, key=None, default_split='test', unit_name='', comparative=Comparative.DIFF):
@@ -420,9 +424,12 @@ class ComputeEvalMetric(ExternalProfilerFunction):
         self.key = key
         self.unit_name = unit_name
         self.comparative = comparative
+        self.secondary_metrics = []
 
     def get_bounded_status_keys(self):
-        return EvalMetric(unit_name=self.unit_name, comparative=self.comparative), InferenceTime()
+        eval_metric = EvalMetric(unit_name=self.unit_name, comparative=self.comparative)
+        inf_metric = InferenceTime()
+        return (eval_metric, inf_metric, *self.secondary_metrics)
 
     def pipe_kwargs_to_call(self, model, data_splits, kwargs):
         kwargs = kwargs.copy()
@@ -430,12 +437,21 @@ class ComputeEvalMetric(ExternalProfilerFunction):
         split = split if split else self.default_split
         return super().pipe_kwargs_to_call(model, data_splits[split], kwargs)
 
-    # TODO support multiple secondary evaluation metrics
+    def add_secondary_metric(self, key, unit_name=None, description=None, comparative=None):
+        unit = self.unit_name if unit_name is None else unit_name
+        comp = self.comparative if comparative is None else comparative
+        new_metric = DynamicEvalMetric(key, unit_name=unit, description=description, comparative=comp)
+        self.secondary_metrics.append(new_metric)
+
     def __call__(self, *args, **kwargs):
         start = time.time()
         rval = self._func(*args, **kwargs)
         inf_time = abs(time.time() - start)
 
         key = 'akey' if self.key is None else self.key
-        rval = EvaluationFunction.filter_call_rval(rval, return_dict=False, return_keys=key)
-        return {'eval_metric': rval, 'inference_time': inf_time}
+        rval1 = EvaluationFunction.filter_call_rval(rval, return_dict=False, return_keys=key)
+        metrics = {'eval_metric': rval1, 'inference_time': inf_time}
+        for metric in self.secondary_metrics:
+            metrics[metric.NAME] = EvaluationFunction.filter_call_rval(rval, return_dict=False,
+                                                                       return_keys=metric.NAME)
+        return metrics

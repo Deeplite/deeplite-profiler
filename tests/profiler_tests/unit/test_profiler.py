@@ -1,9 +1,8 @@
 import pytest
 from tests.profiler_tests.unit import BaseUnitTest
 from unittest import mock
-from copy import deepcopy
 
-from deeplite.profiler.utils import Device
+from deeplite.profiler.formatter import getLogger, setLogger
 from deeplite.profiler.profiler import Profiler, ProfilerFunction, ExternalProfilerFunction
 from deeplite.profiler.metrics import *
 
@@ -55,6 +54,15 @@ class TestProfiler(BaseUnitTest):
             profiler.register_profiler_function(BadDefinedProfilerFunction())
         with pytest.raises(TypeError):
             profiler.register_profiler_function(BadDefinedExternalProfilerFunction())
+
+    def test_profiler_logger(self):
+        logger_holder = getLogger()
+        logger = logger_holder.logger
+        setLogger(logger)
+        assert logger_holder.logger is logger
+
+        with pytest.raises(TypeError):
+            type(logger_holder)()
 
 
 class DummyFlopsProfilerFunction(ProfilerFunction):
