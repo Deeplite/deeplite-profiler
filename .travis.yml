@@ -14,6 +14,11 @@ jobs:
       python: 3.8
       env: CIBW_BUILD="cp38-manylinux_x86_64"
 
+    - services: docker
+      python: 3.9
+      env: CIBW_BUILD="cp38-manylinux_x86_64"
+
+
 # command to install dependencies
 before_install:
   - python3 -m pip install --upgrade pip
