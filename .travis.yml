@@ -16,7 +16,7 @@ jobs:
 
     - services: docker
       python: 3.9
-      env: CIBW_BUILD="cp38-manylinux_x86_64"
+      env: CIBW_BUILD="cp39-manylinux_x86_64"
 
 
 # command to install dependencies
