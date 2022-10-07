@@ -311,6 +311,18 @@ class Profiler(ABC):
         status_dict = {k: mapfunc(pfr) for k, pfr in self._profiling_functions_register.items()}
         return status_dict
 
+    def load_from_dict(self, status_dict, to_value=True):
+        """
+        Update stored values with values from dict
+        """
+        self.reset_status()
+        for k, v in status_dict.items():
+            if k in self._profiling_functions_register:
+                if to_value:
+                    self._profiling_functions_register[k].status.value = v
+                else:
+                    self._profiling_functions_register[k].status = v
+
     def reset_status(self):
         for pfr in set(self._profiling_functions_register.values()):
             pfr.status.value = None
