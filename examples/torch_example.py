@@ -1,3 +1,5 @@
+import logging
+import sys
 from copy import deepcopy
 
 from deeplite.profiler import ComputeEvalMetric, Device
@@ -7,6 +9,8 @@ from deeplite.torch_profiler.torch_profiler import (ComputeComplexity,
                                                     TorchProfiler)
 from deeplite_torch_zoo.wrappers.wrapper import (get_data_splits_by_name,
                                                  get_model_by_name)
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 # Step 1: Define native pytorch dataloaders and model
 # 1a. data_splits = {"train": train_dataloder, "test": test_dataloader}
@@ -42,12 +46,12 @@ profiler.compute_network_status(
     device=Device.GPU,
     short_print=False,
     include_weights=True,
-    print_mode='debug',
+    print_mode='info',
 )
 
 # Step 4: Clone and Compare
 profiler2 = profiler.clone(model=deepcopy(model))
 profiler2.name = "Clone Model"
 profiler2.compare(
-    profiler, short_print=False, batch_size=1, device=Device.GPU, print_mode='debug'
+    profiler, short_print=False, batch_size=1, device=Device.GPU, print_mode='info'
 )
