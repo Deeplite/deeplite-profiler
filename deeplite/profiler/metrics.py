@@ -77,7 +77,7 @@ class Metric(StatusKey):
     def get_comparative(self):
         """
         How does a value of this metric compare with another value of the same metric. Refer to
-        :method:`~compare_status_values` function.
+        :meth:`~compare_status_values` function.
 
         Should return a `Comparative` Enum type or a `str` parsable into a `Comparative`
         """

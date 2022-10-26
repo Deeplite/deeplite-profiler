@@ -48,6 +48,19 @@ class TestProfiler(BaseUnitTest):
             # conflicts over 'flops' with two override=True
             profiler.register_profiler_function(pfunc, override=True)
 
+    def test_status_dict(self):
+        profiler = get_profiler()
+        flops_func = DummyFlopsProfilerFunction()
+        pfunc = DummyAccProfilerFunction()
+        profiler.register_profiler_function(flops_func)
+        profiler.register_profiler_function(pfunc)
+        profiler.compute_network_status()
+        status_dict = profiler.status_to_dict()
+        profiler.reset_status()
+        prof2 = profiler.clone()
+        prof2.load_from_dict(status_dict)
+        assert all([status_dict[k] == v for k, v in prof2.status_to_dict().items()])
+
     def test_fail_register_profiler_function(self):
         profiler = get_profiler()
         with pytest.raises(TypeError):
@@ -68,6 +81,13 @@ class TestProfiler(BaseUnitTest):
 class DummyFlopsProfilerFunction(ProfilerFunction):
     def get_bounded_status_keys(self):
         return Flops()
+
+    def __call__(self, model, data_splits, dummy_arg=1):
+        return dummy_arg
+
+class DummyAccProfilerFunction(ProfilerFunction):
+    def get_bounded_status_keys(self):
+        return TotalParams()
 
     def __call__(self, model, data_splits, dummy_arg=1):
         return dummy_arg

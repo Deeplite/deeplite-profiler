@@ -20,7 +20,7 @@ class Profiler(ABC):
     """
     Abstract class for holding profiler functions. It is the entrypoint for profiling a model over some data.
     The user simply needs to register :class:`~ProfilerFunction` to the :class:`~Profiler` instance through
-    :method:`~register_profiler_function`. Once this is done, the user can query the `Profiler` for some
+    :meth:`~register_profiler_function`. Once this is done, the user can query the `Profiler` for some
     :class:`StatusKey`. `Profiler` will take care to call the relevant `ProfilerFunction` that can compute
     this `StatusKey`.
 
@@ -29,7 +29,7 @@ class Profiler(ABC):
     NOTE: Status keys are held in a dictionary like fashion. However, the user should never
     access and write directly on this dictionary and should go though the various status methods defined
     on this class. This is to keep some sort of consistency between the `ProfilerFunction` and the values
-    they compute. (for ex.: the `recompute` flag of :method:`~compute_status`)
+    they compute. (for ex.: the `recompute` flag of :meth:`~compute_status`)
 
     :param model: An object known by `ProfilerFunction` of that concrete framework (Pytorch, Tensorflow, ...)
     :type model: <native object type>
@@ -54,7 +54,7 @@ class Profiler(ABC):
     def register_profiler_function(self, profiler_func, override=False):
         """
         Register a :class:`~ProfilerFunction` with the :class:`~Profiler`. It will become `callable` that the
-        `Profiler` recognizes and can fetch through a :method:`~compute_status` call. Since each
+        `Profiler` recognizes and can fetch through a :meth:`~compute_status` call. Since each
         `ProfilerFunction` is associated to different :class:`StatusKey`, it is possible that two
         `ProfilerFunction` compete for the same `StatusKey`. For this reason, the :param:`override` can be
         provided to override a currently registered function with the incoming :param:`profiler_func`.
@@ -310,6 +310,18 @@ class Profiler(ABC):
         mapfunc = self.__map_status(to_value)
         status_dict = {k: mapfunc(pfr) for k, pfr in self._profiling_functions_register.items()}
         return status_dict
+
+    def load_from_dict(self, status_dict, to_value=True):
+        """
+        Update stored values with values from dict
+        """
+        self.reset_status()
+        for k, v in status_dict.items():
+            if k in self._profiling_functions_register:
+                if to_value:
+                    self._profiling_functions_register[k].status.value = v
+                else:
+                    self._profiling_functions_register[k].status = v
 
     def reset_status(self):
         for pfr in set(self._profiling_functions_register.values()):
