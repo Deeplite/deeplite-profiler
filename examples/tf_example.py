@@ -1,28 +1,34 @@
+import logging
+import sys
+
 import numpy as np
 import tensorflow as tf
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 try:
     tf.compat.v1.enable_eager_execution()
 except Exception:
     pass
 
-from deeplite.tf_profiler.tf_profiler import TFProfiler
+from deeplite.profiler import ComputeEvalMetric, Device
+from deeplite.tf_profiler.tf_inference import get_accuracy
 from deeplite.tf_profiler.tf_profiler import *
-from deeplite.profiler import Device, ComputeEvalMetric
-from deeplite.tf_profiler.tf_inference import get_accuracy, get_missclass
+from deeplite.tf_profiler.tf_profiler import TFProfiler
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 # Step 1: Define native Tensorflow dataloaders and model (tf.data.Dataset)
 # 1a. data_splits = {"train": train_dataloder, "test": test_dataloader}
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar100.load_data()
 x_train = x_train.astype('float32') / 255
-x_test = x_test.astype('float32') / 255    
+x_test = x_test.astype('float32') / 255
 y_train = np.eye(100)[y_train.reshape(-1)]
 y_test = np.eye(100)[y_test.reshape(-1)]
 train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train)) \
         .shuffle(buffer_size=x_train.shape[0]) \
-        .batch(128) 
+        .batch(128)
 test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)) \
-        .batch(128) 
+        .batch(128)
 data_splits = {'train': train_dataset, 'test': test_dataset}
 
 # 1b. Load the native Tensorflow Keras model: Transfer learning from pretrained model
@@ -51,6 +57,4 @@ profiler.register_profiler_function(ComputeEvalMetric(get_accuracy, 'accuracy', 
 
 # Step 3: Compute the registered profiler metrics for the Tensorflow Keras Model
 profiler.compute_network_status(batch_size=1, device=Device.GPU, short_print=False,
-                                                 include_weights=True, print_mode='debug')
-
-
+                                                 include_weights=True, print_mode='info')
