@@ -7,8 +7,7 @@ from deeplite.torch_profiler.torch_inference import get_accuracy
 from deeplite.torch_profiler.torch_profiler import (ComputeComplexity,
                                                     ComputeExecutionTime,
                                                     TorchProfiler)
-from deeplite_torch_zoo.wrappers.wrapper import (get_data_splits_by_name,
-                                                 get_model_by_name)
+from deeplite_torch_zoo import get_data_splits_by_name, get_model_by_name
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
