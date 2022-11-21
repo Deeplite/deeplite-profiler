@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod, abstractstaticmethod
 from enum import Enum
 
 __all__ = ["Comparative", "LayerwiseSummary", "Flops", "ModelSize", "ExecutionTime", "TotalParams",
-           "MemoryFootprint", "EvalMetric", "InferenceTime"]
+           "MemoryFootprint", "EvalMetric", "InferenceTime", "DynamicEvalMetric"]
 
 
 class Comparative(Enum):

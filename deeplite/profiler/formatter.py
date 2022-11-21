@@ -2,6 +2,7 @@ from collections import OrderedDict
 import logging
 
 from .metrics import Comparative, compare_status_values, Metric, DynamicEvalMetric
+from .utils import cast_tuple
 
 
 class _LoggerHolder:
@@ -195,27 +196,51 @@ def make_two_models_summary_str(status_dict, status_dict_2, short_print=True, de
     return summary_str
 
 
-def default_display_filter_function(status_dict):
+def make_display_filter_function(order=None, include_leftovers=True, exclude=None):
     """
-    The default order is like:
-        - Evaluation Metric
-        - Model Size
-        - Computational Complexity
-        - Number of Parameters
-        - Memory Footprint
-        - Execution Time
-        - Any other custom Metric
+    Create the display function. The default order displayed on the table is like this:
+            - Evaluation Metric
+            - Sub evaluation Metric (if any)
+            - Model Size
+            - Computational Complexity
+            - Number of Parameters
+            - Memory Footprint
+            - Execution Time
+            - Inference Time
+            - Any other custom Metric
 
-    Remove 'Inference Time' as it is not a super relevant metric to display
+    :param order: Order of status keys to display, None is for the order defined in above docstring, defaults to None
+    :type order: Optional[Iterable[str]]
+    :param include_leftovers: Append all other status keys unspecified by the order at the end, defaults to True
+    :type include_leftovers: Bool
+    :param exclude: Sets of status keys to not display, defaults to None
+    :type exclude: Optional[Set[str]]
+    :return: filter function `callable`
     """
-    order = ('eval_metric',) + tuple(DynamicEvalMetric.REGISTRY)
-    order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time')
-    leftovers = tuple(set(status_dict.keys()) - set(('inference_time',) + order))
-    order = order + leftovers
+    def order_iter():
+        if order is None:
+            _order = ('eval_metric',) + tuple(DynamicEvalMetric.REGISTRY)
+            _order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time')
+        else:
+            _order = order
+        for o in _order:
+            yield o
+    exclude = cast_tuple(exclude)
 
-    new_status_dict = OrderedDict()
-    for k in order:
-        if k in status_dict:
-            new_status_dict[k] = status_dict[k]
+    def display_filter_function(status_dict):
+        new_status_dict = OrderedDict()
 
-    return new_status_dict
+        for k in order_iter():
+            if k not in exclude and k in status_dict:
+                new_status_dict[k] = status_dict[k]
+
+        if include_leftovers:
+            for k in set(status_dict) - (set(new_status_dict) | set(exclude)):
+                new_status_dict[k] = status_dict[k]
+
+        return new_status_dict
+
+    return display_filter_function
+
+
+default_display_filter_function = make_display_filter_function()
