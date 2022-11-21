@@ -461,8 +461,8 @@ class ComputeEvalMetric(ExternalProfilerFunction):
         inf_time = abs(time.time() - start)
 
         key = 'akey' if self.key is None else self.key
-        rval1 = EvaluationFunction.filter_call_rval(rval, return_dict=False, return_keys=key)
-        metrics = {'eval_metric': rval1, 'inference_time': inf_time}
+        main_rval = EvaluationFunction.filter_call_rval(rval, return_dict=False, return_keys=key)
+        metrics = {'eval_metric': main_rval, 'inference_time': inf_time}
         for metric in self.secondary_metrics:
             metrics[metric.NAME] = EvaluationFunction.filter_call_rval(rval, return_dict=False,
                                                                        return_keys=metric.NAME)

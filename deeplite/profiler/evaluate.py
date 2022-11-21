@@ -4,7 +4,7 @@ from .utils import Device, cast_tuple
 
 class EvaluationFunction(ABC):
     @abstractmethod
-    def __call__(self, mode, data_loader, device=Device.CPU, **kwargs):
+    def __call__(self, model, data_loader, device=Device.CPU, **kwargs):
         raise NotImplementedError
 
     @staticmethod
