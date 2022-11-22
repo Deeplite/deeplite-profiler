@@ -280,7 +280,7 @@ class Profiler(ABC):
         # create a new instance instead of deepcopying stuff
         model = self.model if not model else model
         data_splits = self.data_splits if not data_splits else data_splits
-        new = type(self)(model, data_splits)
+        new = type(self)(model, data_splits, display_status_filter_func=self.display_status_filter_func)
         new._profiling_functions_register = deepcopy(self._profiling_functions_register)
         if not retain_status and new.model is not self.model:
             new.reset_status()

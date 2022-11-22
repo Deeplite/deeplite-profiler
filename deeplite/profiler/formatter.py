@@ -220,7 +220,7 @@ def make_display_filter_function(order=None, include_leftovers=True, exclude=Non
     def order_iter():
         if order is None:
             _order = ('eval_metric',) + tuple(DynamicEvalMetric.REGISTRY)
-            _order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time')
+            _order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time', 'inference_time')
         else:
             _order = order
         for o in _order:
