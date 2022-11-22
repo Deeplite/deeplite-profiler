@@ -71,7 +71,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name='deeplite-profiler',
-    version='1.2.2',
+    version='1.2.3',
     description='Profiler for deep learning models',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -83,7 +83,7 @@ setup(
     package_data={
     'deeplite': ['deeplite-profiler.sig'],
     },
-    install_requires=["numpy>=1.17"],
+    install_requires=["setuptools<65.6.0", "numpy>=1.17"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
