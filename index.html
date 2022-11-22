@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Deeplite Profiler documentation! &mdash; Deeplite Profiler 1.1.7 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Deeplite Profiler
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Welcome to Deeplite Profiler documentation!</a><ul>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ComputeEvalMetric"><code class="docutils literal notranslate"><span class="pre">ComputeEvalMetric</span></code></a><ul>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ComputeEvalMetric.add_secondary_metric"><code class="docutils literal notranslate"><span class="pre">ComputeEvalMetric.add_secondary_metric()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ComputeEvalMetric.get_bounded_status_keys"><code class="docutils literal notranslate"><span class="pre">ComputeEvalMetric.get_bounded_status_keys()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ComputeEvalMetric.pipe_kwargs_to_call"><code class="docutils literal notranslate"><span class="pre">ComputeEvalMetric.pipe_kwargs_to_call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ExternalProfilerFunction"><code class="docutils literal notranslate"><span class="pre">ExternalProfilerFunction</span></code></a><ul>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ExternalProfilerFunction.can_pipe"><code class="docutils literal notranslate"><span class="pre">ExternalProfilerFunction.can_pipe()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ExternalProfilerFunction.pipe_kwargs_to_call"><code class="docutils literal notranslate"><span class="pre">ExternalProfilerFunction.pipe_kwargs_to_call()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler"><code class="docutils literal notranslate"><span class="pre">Profiler</span></code></a><ul>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.clone"><code class="docutils literal notranslate"><span class="pre">Profiler.clone()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.compare"><code class="docutils literal notranslate"><span class="pre">Profiler.compare()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.compute_network_status"><code class="docutils literal notranslate"><span class="pre">Profiler.compute_network_status()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.compute_status"><code class="docutils literal notranslate"><span class="pre">Profiler.compute_status()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.display_status"><code class="docutils literal notranslate"><span class="pre">Profiler.display_status()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.dl_cls"><code class="docutils literal notranslate"><span class="pre">Profiler.dl_cls()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.enable_forward_pass_data_splits"><code class="docutils literal notranslate"><span class="pre">Profiler.enable_forward_pass_data_splits()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.fp_cls"><code class="docutils literal notranslate"><span class="pre">Profiler.fp_cls()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.load_from_dict"><code class="docutils literal notranslate"><span class="pre">Profiler.load_from_dict()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.register_profiler_function"><code class="docutils literal notranslate"><span class="pre">Profiler.register_profiler_function()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.reset_status"><code class="docutils literal notranslate"><span class="pre">Profiler.reset_status()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_contains"><code class="docutils literal notranslate"><span class="pre">Profiler.status_contains()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_get"><code class="docutils literal notranslate"><span class="pre">Profiler.status_get()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_items"><code class="docutils literal notranslate"><span class="pre">Profiler.status_items()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_keys"><code class="docutils literal notranslate"><span class="pre">Profiler.status_keys()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_to_dict"><code class="docutils literal notranslate"><span class="pre">Profiler.status_to_dict()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.Profiler.status_values"><code class="docutils literal notranslate"><span class="pre">Profiler.status_values()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction"><code class="docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a><ul>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction.can_pipe"><code class="docutils literal notranslate"><span class="pre">ProfilerFunction.can_pipe()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction.get_bounded_status_keys"><code class="docutils literal notranslate"><span class="pre">ProfilerFunction.get_bounded_status_keys()</span></code></a></li>
+<li><a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction.pipe_kwargs_to_call"><code class="docutils literal notranslate"><span class="pre">ProfilerFunction.pipe_kwargs_to_call()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Deeplite Profiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Welcome to Deeplite Profiler documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-deeplite.profiler.profiler">
+<span id="welcome-to-deeplite-profiler-documentation"></span><h1>Welcome to Deeplite Profiler documentation!<a class="headerlink" href="#module-deeplite.profiler.profiler" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ComputeEvalMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deeplite.profiler.profiler.</span></span><span class="sig-name descname"><span class="pre">ComputeEvalMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_split</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Comparative.DIFF</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ComputeEvalMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#deeplite.profiler.profiler.ExternalProfilerFunction" title="deeplite.profiler.profiler.ExternalProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExternalProfilerFunction</span></code></a></p>
+<p>Compute <code class="xref py py-class docutils literal notranslate"><span class="pre">EvalMetric</span></code> from an evaluation function. Examples of those functions can be found
+in deeplite.torch.profiler.torch_inference.</p>
+<p>This makes the additional assumption that an evaluation function is defined only on one split (
+or one data loader)</p>
+<p>If the evaluation function returns a dict, this class can return secondary metrics from that dict.
+For each key corresponding to a desired metric, call <code class="xref py py-meth docutils literal notranslate"><span class="pre">add_secondary_metrics()</span></code> with that key.
+Optionally include the metric’s unit_name and comparative if different from the eval_metric’s</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ComputeEvalMetric.add_secondary_metric">
+<span class="sig-name descname"><span class="pre">add_secondary_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ComputeEvalMetric.add_secondary_metric" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ComputeEvalMetric.get_bounded_status_keys">
+<span class="sig-name descname"><span class="pre">get_bounded_status_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ComputeEvalMetric.get_bounded_status_keys" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a single or a tuple of <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code> that this <cite>ProfilerFunction</cite> computes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ComputeEvalMetric.pipe_kwargs_to_call">
+<span class="sig-name descname"><span class="pre">pipe_kwargs_to_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ComputeEvalMetric.pipe_kwargs_to_call" title="Permalink to this definition"></a></dt>
+<dd><p>Calls itself using <cite>model</cite>, <cite>data_splits</cite> and an arbitrary <cite>kwargs</cite> dict. It uses the
+<cite>bind</cite> method of <cite>inspect.Signature</cite> object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ExternalProfilerFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deeplite.profiler.profiler.</span></span><span class="sig-name descname"><span class="pre">ExternalProfilerFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ExternalProfilerFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a></p>
+<p><a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a> in which the profiling computation comes from an external callable instead of
+being defined in this __call__ method.</p>
+<p>The function <cite>func</cite> still needs to respect the same limitation that <cite>ProfilerFunction.__call__</cite> has: It
+needs to accept (model, data, &lt;any keywords BUT NOT <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs&gt;). It is important to stress out the fact
+that it is not possible to support a <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs in the signature. See <cite>ProfilerFunction</cite> for details.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ExternalProfilerFunction.can_pipe">
+<span class="sig-name descname"><span class="pre">can_pipe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ExternalProfilerFunction.can_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Returns False if its __call__ signature contains <a href="#id5"><span class="problematic" id="id6">*</span></a>args or <a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs else True. This is checked
+through python introspection module inspect.signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ExternalProfilerFunction.pipe_kwargs_to_call">
+<span class="sig-name descname"><span class="pre">pipe_kwargs_to_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ExternalProfilerFunction.pipe_kwargs_to_call" title="Permalink to this definition"></a></dt>
+<dd><p>Calls itself using <cite>model</cite>, <cite>data_splits</cite> and an arbitrary <cite>kwargs</cite> dict. It uses the
+<cite>bind</cite> method of <cite>inspect.Signature</cite> object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deeplite.profiler.profiler.</span></span><span class="sig-name descname"><span class="pre">Profiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name='&lt;UnNamedModel&gt;'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">display_status_filter_func=&lt;function</span> <span class="pre">make_display_filter_function.&lt;locals&gt;.display_filter_function&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract class for holding profiler functions. It is the entrypoint for profiling a model over some data.
+The user simply needs to register <a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a> to the <a class="reference internal" href="#deeplite.profiler.profiler.Profiler" title="deeplite.profiler.profiler.Profiler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Profiler</span></code></a> instance through
+<a class="reference internal" href="#deeplite.profiler.profiler.Profiler.register_profiler_function" title="deeplite.profiler.profiler.Profiler.register_profiler_function"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_profiler_function()</span></code></a>. Once this is done, the user can query the <cite>Profiler</cite> for some
+<code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code>. <cite>Profiler</cite> will take care to call the relevant <cite>ProfilerFunction</cite> that can compute
+this <cite>StatusKey</cite>.</p>
+<p>Each new framework should subclass this class. See <code class="xref py py-class docutils literal notranslate"><span class="pre">TorchProfiler</span></code> for example using Pytorch.</p>
+<p>NOTE: Status keys are held in a dictionary like fashion. However, the user should never
+access and write directly on this dictionary and should go though the various status methods defined
+on this class. This is to keep some sort of consistency between the <cite>ProfilerFunction</cite> and the values
+they compute. (for ex.: the <cite>recompute</cite> flag of <a class="reference internal" href="#deeplite.profiler.profiler.Profiler.compute_status" title="deeplite.profiler.profiler.Profiler.compute_status"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_status()</span></code></a>)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>&lt;native object type&gt;</em>) – An object known by <cite>ProfilerFunction</cite> of that concrete framework (Pytorch, Tensorflow, …)</p></li>
+<li><p><strong>data_splits</strong> (<cite>dict</cite> of <cite>str</cite> to &lt;native data object&gt;) – Splits of the data used to for the <cite>ProfilerFunction</cite>.</p></li>
+<li><p><strong>name</strong> (<cite>str</cite>, optional) – A user-friendly name for the model, defaults to “&lt;UnNamedModel&gt;”</p></li>
+<li><p><strong>display_status_filter_func</strong> (<cite>callable</cite>, optional) – A method to display the computed metrics in a user-friendly readable format,
+defaults to deeplite.profiler.formatter.default_display_filter_function</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.clone" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.compare">
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.compare" title="Permalink to this definition"></a></dt>
+<dd><p>Compare two different :class:<a href="#id9"><span class="problematic" id="id10">`</span></a>~Profiler`s. The two different profilers could belong to the same model
+or different models. Compare <em>is</em> for stdout / logging comparison.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#deeplite.profiler.profiler.Profiler" title="deeplite.profiler.profiler.Profiler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Profiler</span></code></a>) – Another profiler object</p></li>
+<li><p><strong>print_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Logger print mode, defaults to ‘info’</p></li>
+<li><p><strong>recompute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If all the <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code> need to be recomputed, defaults to False</p></li>
+<li><p><strong>short_print</strong> (<em>bool</em><em>, </em><em>optional</em>) – If to display a short version of the profiled output or a long detailed version,
+defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – Can only compare with another profiler instance</p></li>
+<li><p><strong>ValueError</strong> – Given other profiler does not have the same set of status keys as this profiler</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.compute_network_status">
+<span class="sig-name descname"><span class="pre">compute_network_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.compute_network_status" title="Permalink to this definition"></a></dt>
+<dd><p>Calls all registered <a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a> and populates its whole status dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>print_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – A default printing mode of the logger, defaults to None (no logging)</p></li>
+<li><p><strong>recompute</strong> (<em>bool</em><em>, </em><em>optional</em>) – If all the <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code> need to be recomputed, defaults to False</p></li>
+<li><p><strong>short_print</strong> (<em>bool</em><em>, </em><em>optional</em>) – Display a short version of the profiled output or a long detailed version,
+defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary of updated key-value pairs of the metric status key and the metric value</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.compute_status">
+<span class="sig-name descname"><span class="pre">compute_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recompute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.compute_status" title="Permalink to this definition"></a></dt>
+<dd><p>Computing a <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code>. The method will fetch its associated <a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a>
+and call it with its model, data_splits and <cite>kwargs</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> (<cite>str</cite>) – Unique string identifier of wanted <cite>StatusKey</cite></p></li>
+<li><p><strong>recompute</strong> (<cite>bool</cite>, optional) – If the metric values need to be recomputed, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If an unrecognized status key is found</p></li>
+<li><p><strong>TypeError</strong> – If the profiling function and its status key are matched incorrectly</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns what the <cite>ProfilerFunction</cite> returned for this <a href="#id11"><span class="problematic" id="id12">:param:`status`</span></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.display_status">
+<span class="sig-name descname"><span class="pre">display_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'debug'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">short_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.display_status" title="Permalink to this definition"></a></dt>
+<dd><p>Beautiful user-friendly display of either one or two dictionaries of profiler status</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<em>dictionary</em><em>, </em><em>optional</em>) – An optional second status message to compare, defaults to None</p></li>
+<li><p><strong>print_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Logger print mode, defaults to ‘debug’</p></li>
+<li><p><strong>short_print</strong> (<em>bool</em><em>, </em><em>optional</em>) – If to display a short version of the profiled output or a long detailed version,
+defaults to True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.dl_cls">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dl_cls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.dl_cls" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the concrete framework <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.enable_forward_pass_data_splits">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enable_forward_pass_data_splits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_pass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.enable_forward_pass_data_splits" title="Permalink to this definition"></a></dt>
+<dd><p>Creating deeplite dataloader from the provided data splits dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>native_ds</strong> (<em>&lt;native data loader object&gt;</em><em> (</em><em>ex.: torch.utils.data.DataLoader</em><em> or </em><em>tf.data</em><em>)</em>) – Splits of the train-test input data (ex: {‘train’: train_loader,
+‘test’: test_loader}). Internally each dataloader can one of a PyTorch or Tensorflow dataloader</p></li>
+<li><p><strong>forward_pass</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardPass</span></code>, optional) – A forward pass utility to send the data through the model, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>deeplite dataloader</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">deeplite.profiler.data_loader.DataLoader</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.fp_cls">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fp_cls</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.fp_cls" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the concrete framework <code class="xref py py-class docutils literal notranslate"><span class="pre">ForwardPass</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.load_from_dict">
+<span class="sig-name descname"><span class="pre">load_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.load_from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Update stored values with values from dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.register_profiler_function">
+<span class="sig-name descname"><span class="pre">register_profiler_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">profiler_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.register_profiler_function" title="Permalink to this definition"></a></dt>
+<dd><p>Register a <a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a> with the <a class="reference internal" href="#deeplite.profiler.profiler.Profiler" title="deeplite.profiler.profiler.Profiler"><code class="xref py py-class docutils literal notranslate"><span class="pre">Profiler</span></code></a>. It will become <cite>callable</cite> that the
+<cite>Profiler</cite> recognizes and can fetch through a <a class="reference internal" href="#deeplite.profiler.profiler.Profiler.compute_status" title="deeplite.profiler.profiler.Profiler.compute_status"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compute_status()</span></code></a> call. Since each
+<cite>ProfilerFunction</cite> is associated to different <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code>, it is possible that two
+<cite>ProfilerFunction</cite> compete for the same <cite>StatusKey</cite>. For this reason, the <a href="#id13"><span class="problematic" id="id14">:param:`override`</span></a> can be
+provided to override a currently registered function with the incoming <a href="#id15"><span class="problematic" id="id16">:param:`profiler_func`</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>profiler_func</strong> (<a class="reference internal" href="#deeplite.profiler.profiler.ProfilerFunction" title="deeplite.profiler.profiler.ProfilerFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProfilerFunction</span></code></a>) – A callable that computes some <cite>StatusKey</cite></p></li>
+<li><p><strong>override</strong> (<cite>bool</cite>, optional) – Overrides any <cite>StatusKey</cite> computed with already registered <cite>ProfilerFunction</cite> to new
+<cite>profiler_func</cite>, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Cannot pipe the provided <cite>ProfilerFunction</cite></p></li>
+<li><p><strong>RuntimeError</strong> – Two <cite>ProfilerFunction</cite>’s with the same <cite>StatusKey</cite> and both with <cite>override=True</cite></p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><cite>profiler_func</cite> itself</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><cite>ProfilerFunction</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.reset_status">
+<span class="sig-name descname"><span class="pre">reset_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.reset_status" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_contains">
+<span class="sig-name descname"><span class="pre">status_contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_contains" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_get">
+<span class="sig-name descname"><span class="pre">status_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sk</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_get" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_items">
+<span class="sig-name descname"><span class="pre">status_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_items" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_keys">
+<span class="sig-name descname"><span class="pre">status_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_keys" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_to_dict">
+<span class="sig-name descname"><span class="pre">status_to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_to_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.Profiler.status_values">
+<span class="sig-name descname"><span class="pre">status_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.Profiler.status_values" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ProfilerFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deeplite.profiler.profiler.</span></span><span class="sig-name descname"><span class="pre">ProfilerFunction</span></span><a class="headerlink" href="#deeplite.profiler.profiler.ProfilerFunction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract callable which computes any set of <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code> on given model and data.</p>
+<p>Every <cite>ProfilerFunction</cite> is bound to a set of <cite>StatusKey</cite> which they compute their values.
+The <cite>Profiler</cite> seeks this particular function upon a query for a <cite>StatusKey</cite> bounded to it.</p>
+<p>IMPORTANT: The common use case is to request for all profiler’s functions to be computed. Since
+by nature its functions are dynamically registered, <cite>Profiler</cite> does not know in advance what
+arguments can be passed to them. It tries to magically pipe the user’s <cite>kwargs</cite> to its
+functions. It creates a limitation on this class’ __call__ signature when its instance is used
+directly (as opposed to mid-level class only defined as abstraction and never used as instance).
+Because of this magic, the signature of the __call__ cannot contain <a href="#id17"><span class="problematic" id="id18">*</span></a>args or <a href="#id19"><span class="problematic" id="id20">**</span></a>kwargs.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ProfilerFunction.can_pipe">
+<span class="sig-name descname"><span class="pre">can_pipe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ProfilerFunction.can_pipe" title="Permalink to this definition"></a></dt>
+<dd><p>Returns False if its __call__ signature contains <a href="#id21"><span class="problematic" id="id22">*</span></a>args or <a href="#id23"><span class="problematic" id="id24">**</span></a>kwargs else True. This is checked
+through python introspection module inspect.signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ProfilerFunction.get_bounded_status_keys">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_bounded_status_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ProfilerFunction.get_bounded_status_keys" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a single or a tuple of <code class="xref py py-class docutils literal notranslate"><span class="pre">StatusKey</span></code> that this <cite>ProfilerFunction</cite> computes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deeplite.profiler.profiler.ProfilerFunction.pipe_kwargs_to_call">
+<span class="sig-name descname"><span class="pre">pipe_kwargs_to_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_splits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deeplite.profiler.profiler.ProfilerFunction.pipe_kwargs_to_call" title="Permalink to this definition"></a></dt>
+<dd><p>Calls itself using <cite>model</cite>, <cite>data_splits</cite> and an arbitrary <cite>kwargs</cite> dict. It uses the
+<cite>bind</cite> method of <cite>inspect.Signature</cite> object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Deeplite.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
