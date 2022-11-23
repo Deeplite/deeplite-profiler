@@ -5,8 +5,8 @@ from inspect import signature, Parameter
 import time
 
 from .evaluate import EvaluationFunction
-from .formatter import getLogger, make_one_model_summary_str, make_two_models_summary_str, \
-    default_display_filter_function
+from .formatter import getLogger, \
+    DefaultDisplay
 from .metrics import EvalMetric, DynamicEvalMetric, InferenceTime, Comparative
 from .utils import cast_tuple
 
@@ -15,6 +15,7 @@ logger = getLogger(__name__)
 _ProfilerFunctionRegister = namedtuple("_ProfilerFunctionRegister", ('function', 'overriding', 'status'),
                                        module=__name__)
 
+default_display = DefaultDisplay(logger)
 
 class Profiler(ABC):
     """
@@ -43,13 +44,13 @@ class Profiler(ABC):
     """
 
     def __init__(self, model, data_splits, name="<UnNamedModel>",
-                 display_status_filter_func=default_display_filter_function):
+                 display=default_display):
         self._profiling_functions_register = {}
         self.model = model
         self.name = name
         self.data_splits = data_splits
         self.backend = '<None>'
-        self.display_status_filter_func = display_status_filter_func
+        self.display = display
 
     def register_profiler_function(self, profiler_func, override=False):
         """
@@ -79,22 +80,6 @@ class Profiler(ABC):
 
         for sk in status_keys:
             self._register_status_key(sk, profiler_func, override)
-            # sk_name = sk.NAME
-            # if sk_name in self._profiling_functions_register.keys():
-            #     pf = self._profiling_functions_register[sk_name]
-            #     if pf.overriding and override:
-            #         raise RuntimeError(
-            #             "Two profiler functions, '{}' and '{}', both with 'override=True' ".format(
-            #                 profiler_func, pf.function) + "are competing over status key '{}'".format(
-            #                 sk_name))
-            #     if pf.overriding is False and override is False:
-            #         logger.warning(
-            #             "Registered profiler function '{}' for status key '{}' is being overridden by '{}'".format(
-            #             pf.function, sk_name, profiler_func))
-            #     elif pf.overriding is True and override is False:
-            #         continue
-            # self._profiling_functions_register[sk_name] = _ProfilerFunctionRegister(
-            #     profiler_func, override, sk)
         return profiler_func
 
     def _register_status_key(self, sk, profiler_func, override):
@@ -270,36 +255,13 @@ class Profiler(ABC):
         # of the display filter function.
         assert isinstance(print_mode, str) and hasattr(logger, print_mode.lower()), \
             "'print_mode' needs to be a logger level"
-
-        status_dict = self.status_to_dict(to_value=False)
-        layerwise_summary_1 = status_dict.pop('layerwise_summary', None)
-        status_dict = self.display_status_filter_func(status_dict)
-        status_dict['backend'] = self.backend
-        status_dict['name'] = self.name
-
-        if other is not None:
-            other_status_dict = other.status_to_dict(to_value=False)
-            layerwise_summary_2 = other_status_dict.pop('layerwise_summary', None)
-            other_status_dict = self.display_status_filter_func(other_status_dict)
-            other_status_dict['backend'] = other.backend
-            other_status_dict['name'] = other.name
-            summary_str = make_two_models_summary_str(status_dict, other_status_dict, short_print=short_print)
-        else:
-            layerwise_summary_2 = None
-            summary_str = make_one_model_summary_str(status_dict, short_print=short_print)
-
-        if not short_print:
-            if layerwise_summary_1:
-                logger.debug(layerwise_summary_1.value)
-            if layerwise_summary_2:
-                logger.debug(layerwise_summary_2.value)
-        getattr(logger, print_mode.lower())(summary_str)
+        self.display.display_status(self, other, print_mode, short_print)
 
     def clone(self, model=None, data_splits=None, retain_status=False):
         # create a new instance instead of deepcopying stuff
         model = self.model if not model else model
         data_splits = self.data_splits if not data_splits else data_splits
-        new = type(self)(model, data_splits, display_status_filter_func=self.display_status_filter_func)
+        new = type(self)(model, data_splits, display=self.display)
         new._profiling_functions_register = deepcopy(self._profiling_functions_register)
         if not retain_status and new.model is not self.model:
             new.reset_status()
