@@ -69,8 +69,8 @@ class TestProfiler(BaseUnitTest):
         profiler.display_status_filter_func = make_display_filter_function(exclude='c')
         compute_eval = ComputeEvalMetric(evaluate, key='a', default_split='train')
         compute_eval.add_secondary_metric('b')
-        compute_eval.add_secondary_metric('c')
         profiler.register_profiler_function(compute_eval)
+        profiler.add_secondary_eval_metric('c')
 
         status = profiler.compute_network_status()
         assert 'inference_time' in status

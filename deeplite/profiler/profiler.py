@@ -78,23 +78,42 @@ class Profiler(ABC):
         status_keys = cast_tuple(profiler_func.get_bounded_status_keys())
 
         for sk in status_keys:
-            sk_name = sk.NAME
-            if sk_name in self._profiling_functions_register.keys():
-                pf = self._profiling_functions_register[sk_name]
-                if pf.overriding and override:
-                    raise RuntimeError(
-                        "Two profiler functions, '{}' and '{}', both with 'override=True' ".format(
-                            profiler_func, pf.function) + "are competing over status key '{}'".format(
-                            sk_name))
-                if pf.overriding is False and override is False:
-                    logger.warning(
-                        "Registered profiler function '{}' for status key '{}' is being overridden by '{}'".format(
-                        pf.function, status_keys, profiler_func))
-                elif pf.overriding is True and override is False:
-                    continue
-            self._profiling_functions_register[sk_name] = _ProfilerFunctionRegister(
-                profiler_func, override, sk)
+            self._register_status_key(sk, profiler_func, override)
+            # sk_name = sk.NAME
+            # if sk_name in self._profiling_functions_register.keys():
+            #     pf = self._profiling_functions_register[sk_name]
+            #     if pf.overriding and override:
+            #         raise RuntimeError(
+            #             "Two profiler functions, '{}' and '{}', both with 'override=True' ".format(
+            #                 profiler_func, pf.function) + "are competing over status key '{}'".format(
+            #                 sk_name))
+            #     if pf.overriding is False and override is False:
+            #         logger.warning(
+            #             "Registered profiler function '{}' for status key '{}' is being overridden by '{}'".format(
+            #             pf.function, sk_name, profiler_func))
+            #     elif pf.overriding is True and override is False:
+            #         continue
+            # self._profiling_functions_register[sk_name] = _ProfilerFunctionRegister(
+            #     profiler_func, override, sk)
         return profiler_func
+
+    def _register_status_key(self, sk, profiler_func, override):
+        sk_name = sk.NAME
+        if sk_name in self._profiling_functions_register.keys():
+            pf = self._profiling_functions_register[sk_name]
+            if pf.overriding and override:
+                raise RuntimeError(
+                    "Two profiler functions, '{}' and '{}', both with 'override=True' ".format(
+                        profiler_func, pf.function) + "are competing over status key '{}'".format(
+                        sk_name))
+            if pf.overriding is False and override is False:
+                logger.warning(
+                    "Registered profiler function '{}' for status key '{}' is being overridden by '{}'".format(
+                    pf.function, sk_name, profiler_func))
+            elif pf.overriding is True and override is False:
+                return
+        self._profiling_functions_register[sk_name] = _ProfilerFunctionRegister(
+            profiler_func, override, sk)
 
     @classmethod
     @abstractmethod
@@ -286,6 +305,17 @@ class Profiler(ABC):
             new.reset_status()
         new.backend = self.backend
         return new
+
+    def get_eval_pfr(self):
+        for pfr in self._profiling_functions_register.values():
+            if isinstance(pfr.function, ComputeEvalMetric):
+                return pfr
+
+    def add_secondary_eval_metric(self, key, unit_name=None, description=None, comparative=None):
+        eval_pfr = self.get_eval_pfr()
+        eval_pfr.function.add_secondary_metric(key, unit_name, description, comparative)
+        secondary_eval_metric = eval_pfr.function.secondary_metrics[-1]
+        self._register_status_key(secondary_eval_metric, eval_pfr.function, eval_pfr.overriding)
 
     # Below are methods to give dict-like access to the internal status storage.
     # Everything is returned as new iterable in order to make sure nothing external
