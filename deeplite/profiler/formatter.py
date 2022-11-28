@@ -178,8 +178,9 @@ class Display:
 class DefaultDisplay(Display):
     def make_display_filter_function(self, profiler, order=None, include_leftovers=True, exclude=None):
         eval_pfr = profiler.get_eval_pfr()
-        secondary_metrics = tuple([m.NAME for m in eval_pfr.function.secondary_metrics])
-        print(secondary_metrics)
+        secondary_metrics = ()
+        if eval_pfr:
+            secondary_metrics += tuple([m.NAME for m in eval_pfr.function.secondary_metrics])
         def order_iter():
             if order is None:
                 _order = ('eval_metric',) + secondary_metrics

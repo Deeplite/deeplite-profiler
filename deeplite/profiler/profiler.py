@@ -253,8 +253,6 @@ class Profiler(ABC):
         """
         # NOTE: force pop layerwise summary and display in debug mode as it is quite long regardless
         # of the display filter function.
-        assert isinstance(print_mode, str) and hasattr(logger, print_mode.lower()), \
-            "'print_mode' needs to be a logger level"
         self.display.display_status(self, other, print_mode, short_print)
 
     def clone(self, model=None, data_splits=None, retain_status=False):
