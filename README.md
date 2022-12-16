@@ -12,23 +12,24 @@ To be able to use a deep learning model in research and production, it is essent
   <img src="https://docs.deeplite.ai/neutrino/_images/profiler.png" />
 </p>
 
-* [Installation](#Installation)
-    * [Install using pip](#Install-using-pip)
-    * [Install from source](#Install-from-source)
-    * [Install in Dev mode](#Install-in-dev-mode)
-* [How to Use](#How-to-Use)
-    * [For PyTorch Model](#For-pytorch-Model)
-    * [For Tensorflow Model](#For-Tensorflow-Model)
-    * [Output Display](#FOutput-Display)
-* [Examples](#Examples)
-* [Contribute a Custom Metric](#Contribute-a-Custom-Metric)
+- [Deeplite Profiler](#deeplite-profiler)
+- [Installation](#installation)
+  - [Install using pip](#install-using-pip)
+  - [Install from source](#install-from-source)
+  - [Install in Dev mode](#install-in-dev-mode)
+- [How to Use](#how-to-use)
+  - [For a PyTorch Model](#for-a-pytorch-model)
+  - [For a TensorFlow Model](#for-a-tensorflow-model)
+  - [Output Display](#output-display)
+- [Examples](#examples)
+- [Contribute a Custom Metric](#contribute-a-custom-metric)
 
 
 # Installation
 
 ## Install using pip
 
-Use following command to install the package from our internal PyPI repository. 
+Use following command to install the package from our internal PyPI repository.
 
 ```console
 $ pip install --upgrade pip
@@ -65,7 +66,7 @@ To test the installation, one can run the basic tests using `pytest` command in 
 
 # How to Use
 
-## For PyTorch Model
+## For a PyTorch Model
 
 ```python
 # Step 1: Define native pytorch dataloaders and model
@@ -90,7 +91,7 @@ profiler2.name = "Clone Model"
 profiler.compare(profiler2, short_print=False, batch_size=1, device=Device.CPU, print_mode='debug')
 ```
 
-## For Tensorflow Model
+## For a TensorFlow Model
 
 ```python
 # Step 1: Define native tensorflow dataloaders and model
@@ -120,7 +121,7 @@ profiler.compare(profiler2, short_print=False, batch_size=1, device=Device.CPU, 
 
 ## Output Display
 
-An example output of the ``deeplite-profiler`` for ``resnet18`` model using the standard ``CIFAR100`` dataset using ``PyTorch`` backend, looks as follows
+An example output of the ``deeplite-profiler`` for ``resnet18`` model using the standard ``CIFAR100`` dataset using ``PyTorch`` backend looks as follows
 
 ```console
 +---------------------------------------------------------------+
@@ -147,7 +148,7 @@ An example output of the ``deeplite-profiler`` for ``resnet18`` model using the 
 
 # Examples
 
-A list of different examples to use ``deeplite-profiler`` to profiler different PyTorch and TensorFlow models can be found [here](./examples) 
+A list of different examples to use ``deeplite-profiler`` to profiler different PyTorch and TensorFlow models can be found [here](./examples)
 
 # Contribute a Custom Metric
 

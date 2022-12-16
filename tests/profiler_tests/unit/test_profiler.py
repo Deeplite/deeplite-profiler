@@ -2,8 +2,8 @@ import pytest
 from tests.profiler_tests.unit import BaseUnitTest
 from unittest import mock
 
-from deeplite.profiler.formatter import getLogger, setLogger
-from deeplite.profiler.profiler import Profiler, ProfilerFunction, ExternalProfilerFunction
+from deeplite.profiler.formatter import getLogger, setLogger, make_display_filter_function
+from deeplite.profiler.profiler import Profiler, ProfilerFunction, ExternalProfilerFunction, ComputeEvalMetric
 from deeplite.profiler.metrics import *
 
 
@@ -48,6 +48,40 @@ class TestProfiler(BaseUnitTest):
             # conflicts over 'flops' with two override=True
             profiler.register_profiler_function(pfunc, override=True)
 
+    def test_status_dict(self):
+        profiler = get_profiler()
+        flops_func = DummyFlopsProfilerFunction()
+        pfunc = DummyAccProfilerFunction()
+        profiler.register_profiler_function(flops_func)
+        profiler.register_profiler_function(pfunc)
+        profiler.compute_network_status()
+        status_dict = profiler.status_to_dict()
+        profiler.reset_status()
+        prof2 = profiler.clone()
+        prof2.load_from_dict(status_dict)
+        assert all([status_dict[k] == v for k, v in prof2.status_to_dict().items()])
+
+    def test_multiple_eval_metrics(self):
+        def evaluate(model, data_loader):
+            return {'a': 10, 'b': 20, 'c': 30, 'd': 40}
+
+        profiler = get_profiler()
+        profiler.display_status_filter_func = make_display_filter_function(exclude='c')
+        compute_eval = ComputeEvalMetric(evaluate, key='a', default_split='train')
+        compute_eval.add_secondary_metric('b')
+        compute_eval.add_secondary_metric('c')
+        profiler.register_profiler_function(compute_eval)
+
+        status = profiler.compute_network_status()
+        assert 'inference_time' in status
+        assert status['eval_metric'] == 10
+        assert status['b'] == 20
+        assert status['c'] == 30
+        assert 'd' not in status
+
+        # should display 'b' but not 'c' and 'd'
+        profiler.display_status()
+
     def test_fail_register_profiler_function(self):
         profiler = get_profiler()
         with pytest.raises(TypeError):
@@ -73,6 +107,14 @@ class DummyFlopsProfilerFunction(ProfilerFunction):
         return dummy_arg
 
 
+class DummyAccProfilerFunction(ProfilerFunction):
+    def get_bounded_status_keys(self):
+        return TotalParams()
+
+    def __call__(self, model, data_splits, dummy_arg=1):
+        return dummy_arg
+
+
 class DummyProfilerFunction(ProfilerFunction):
     def get_bounded_status_keys(self):
         return Flops()
@@ -84,6 +126,7 @@ class DummyProfilerFunction(ProfilerFunction):
 class BadDefinedProfilerFunction(ProfilerFunction):
     def __call__(self, *args, **kwargs):
         pass
+
 
 class BadDefinedExternalProfilerFunction(ExternalProfilerFunction):
     def __init__(self):

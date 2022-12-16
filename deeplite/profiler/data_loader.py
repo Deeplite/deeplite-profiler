@@ -142,15 +142,15 @@ class ModelInputPattern(tuple):
 
 class ForwardPass(ABC):
     """
-    Unifies the output of a DataLoader and a model call. Its main entry points are :method:`~perform` and
-    :method:`~random_perform`. It offers various mid-level automatic implementations of some functionalities
+    Unifies the output of a DataLoader and a model call. Its main entry points are :meth:`~perform` and
+    :meth:`~random_perform`. It offers various mid-level automatic implementations of some functionalities
     if some assumptions are valid. There are only two assumptions that the user needs to inform,
     `model_input_pattern` and `expecting_common_inputs`.
 
     If a `model_input_pattern` is provided as a
     special tuple :class:`~ModelInputPattern`, the `ForwardPass` then knows how to filter the relevant
     element out of the batch tuple and perform a call on the model with them. Therefore, the user does not
-    need to implement a custom :method:`~perform` method.
+    need to implement a custom :meth:`~perform` method.
 
     If `expecting_common_inputs` is True, then the input is expected to be "standard". By that we mean that
     it follows the convention that we expect a tuple of tensors to be a tuple of
@@ -158,7 +158,7 @@ class ForwardPass(ABC):
     types should have items of type numpy or framework tensors.
     Following this to be True, then `ForwardPass` can extract the shapes of the model's inputs and
     generate random tensors that will be compatible with the model's call signature. Therefore, the user
-    does not need to implement a custom :method:`~random_perform`.
+    does not need to implement a custom :meth:`~random_perform`.
 
     In the case that `model_input_pattern` is provided and `expecting_common_inputs` is True, the the
     user has nothing to override! If the use case is too complex for these assumptions to work, the user
