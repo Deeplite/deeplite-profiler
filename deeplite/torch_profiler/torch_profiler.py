@@ -11,13 +11,90 @@ from deeplite.profiler.metrics import *
 from deeplite.profiler.utils import AverageAggregator, Device
 from deeplite.profiler.formatter import getLogger
 
+from deeplite.profiler.trace import trace
+from deeplite.profiler.ir import Layer, Tensor
+from deeplite.profiler.memory_allocation.placer import Placer
+from deeplite.profiler.report import Report
+
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
 logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
 
+#######
+from deeplite.profiler.handlers import handlers
+def get_params(model):
+    return sum(param.numel() for param in model.parameters())
 
+def get_macs(graph, reduction=sum):
+    results = dict()
+    for node in graph.nodes:
+        for operators, func in handlers:
+            if isinstance(operators, str):
+                operators = [operators]
+            if node.operator in operators:
+                if func is not None:
+                    results[node] = func(node)
+                break
+        else:
+            warnings.warn('No handlers found: "{}". Skipped.'.format(
+                node.operator))
+
+    if reduction is not None:
+        return reduction(results.values())
+    else:
+        return results
+
+
+def get_nodes(graph):
+    nodes = []
+    for i, node in enumerate(graph.nodes):
+        if 'aten' in node.operator: # aten ops
+            inputs = []
+            outputs = []
+            weights = []
+            bias = []
+            if 'conv' in node.operator:
+                weights = node.inputs[1].shape
+                if node.inputs[2].shape is not None:
+                    bias = node.inputs[2].shape
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape))
+            elif 'mm' in node.operator:
+                weights = node.inputs[2].shape
+                if node.inputs[0].shape is not None:
+                    bias = node.inputs[0].shape
+                inputs.append(Tensor(name=node.inputs[1].name,
+                        dtype=node.inputs[1].dtype, shape=node.inputs[1].shape))
+            elif node.operator in ['aten::batch_norm', 'aten::instance_norm']:
+                if node.inputs[1].shape is not None:
+                    weights = node.inputs[1].shape # to double-chek
+                    bias = node.inputs[2].shape #
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape))
+            elif node.operator in ['aten::layer_norm', 'aten::group_norm']:
+                if node.inputs[2].shape is not None:
+                    weights = node.inputs[2].shape # to double-chek
+                    bias = node.inputs[2].shape # ???
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape))
+            else:
+                for x in node.inputs:
+                    if x.shape is not None:
+                        if x.ndim > 1:
+                            inputs.append(Tensor(name=x.name, dtype=x.dtype,
+                                    shape=x.shape))
+            for x in node.outputs:
+                outputs.append(Tensor(name=x.name, dtype=x.dtype,
+                    shape=x.shape))
+
+            nodes.append(Layer(name="{}_{}".format(i, node.operator),
+                inputs=inputs, outputs=outputs, weights=weights, bias=bias))
+
+    return nodes
+
+#######
 class TorchProfiler(Profiler):
     def __init__(self, model, data_splits, **kwargs):
         super().__init__(model, data_splits, **kwargs)
@@ -54,46 +131,32 @@ class ComputeComplexity(ProfilerFunction):
         assert len(sk_cls) == len(rval)
         return {x.NAME: y for x, y in zip(sk_cls, rval)}
 
-    # This is adapted from ptflops
-    # HAS TO RETURN A TUPLE IN THE SAME ORDER OF STATUSKEYS
+
     def _compute_complexity(self, model, dataloader, batch_size=1, device=Device.CPU, include_weights=True):
         temp_model = deepcopy(model)
         forward_pass = dataloader.forward_pass
 
-        with torch.no_grad():
-            # synchronize gpu time and measure fp
-            temp_model = TorchProfiler.model_to_device(temp_model, device)
-            flops_model = flops_counter.add_flops_counting_methods(temp_model)
-            flops_model.eval()
+        # input_shape = [batch_size] + list(trainloader.forward_pass.get_model_input_shapes()[0])
+        inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)[0]
+        graph = trace(model.cpu(), inputs)
 
-            # DRY RUNS
-            for _ in range(5):
-                if device == Device.GPU:
-                    torch.cuda.synchronize()
-                    forward_pass.random_perform(flops_model, batch_size=batch_size, device=device)
+        macs = get_macs(graph)
+        params = get_params(model)
 
-            # Add hooks and start the run
-            flops_model.start_flops_count(ost=sys.stdout, verbose=False, ignore_list=[])
-            if device == Device.GPU:
-                torch.cuda.synchronize()
+        nodes = get_nodes(graph)
+        placer = Placer(nodes)
+        nodes = placer.place(num_bytes=4)
+        report = Report(nodes, export=True, filename='outmodel')
+        df = report.get_stats()
+        
+        flops = macs / 1e9
+        model_size = (params*4) / (2**20)
+        params /= 1e6
+        peak_memory = df.ram.max() / (2**20)
+        summary_str = df.to_string()
+        print(summary_str)
 
-            t0 = time.time()
-            forward_pass.random_perform(flops_model, batch_size=batch_size, device=device)
-            flops_count, params_count, model_size, activation_size, summary_str = \
-                flops_model.compute_average_flops_cost("", t0)
-
-            flops_model.stop_flops_count()
-
-        flops = flops_count / 1e9  # Giga Flops
-        params = params_count / 1e6  # Million Flops
-        model_size = abs(model_size / (1024 ** 2.))  # Convert bytes to MB
-        shapes_tuple = forward_pass.get_model_input_shapes()
-        total_input_size = abs(
-            np.prod(sum(shapes_tuple, ()))) * batch_size * 4  # Multiply with batch_size and bit precision
-        memory_footprint = abs((total_input_size + activation_size) / (1024 ** 2.))
-        total_memory_footprint = model_size + memory_footprint if include_weights else memory_footprint
-
-        return flops, params, model_size, total_memory_footprint, summary_str
+        return macs, params, model_size, peak_memory, summary_str
 
 
 class ComputeExecutionTime(ProfilerFunction):
