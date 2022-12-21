@@ -14,12 +14,13 @@ class Report:
         df = pd.DataFrame(
                 index=[node.name for node in self.nodes], columns=[
                 'weight', 'bias', 'input_shape', 'output_shape', 'in_tensors', 'out_tensors',
-                'active_blocks', 'ram']
+                'active_blocks', 'ram'] # params
                 )
 
         for node in self.nodes:
             df.weight[node.name] = node.weights
             df.bias[node.name] = node.bias
+            #df.params[node.name] = prod(node.weights) + prod(node.bias)
             df.input_shape[node.name] = [x.shape for x in node.inputs]
             df.output_shape[node.name] = [x.shape for x in node.outputs]
             df.in_tensors[node.name] = [x.name for x in node.inputs]
