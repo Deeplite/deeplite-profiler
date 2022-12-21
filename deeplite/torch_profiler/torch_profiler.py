@@ -1,9 +1,6 @@
 from copy import deepcopy
 import time
 import sys
-
-import numpy as np
-from thirdparty import ptflops as flops_counter
 import torch
 
 from deeplite.profiler import Profiler, ProfilerFunction
@@ -15,6 +12,7 @@ from deeplite.profiler.trace import trace
 from deeplite.profiler.ir import Layer, Tensor
 from deeplite.profiler.memory_allocation.placer import Placer
 from deeplite.profiler.report import Report
+from deeplite.profiler.handlers import handlers
 
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
@@ -22,8 +20,6 @@ logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
 
-#######
-from deeplite.profiler.handlers import handlers
 def get_params(model):
     return sum(param.numel() for param in model.parameters())
 
@@ -45,7 +41,6 @@ def get_macs(graph, reduction=sum):
         return reduction(results.values())
     else:
         return results
-
 
 def get_nodes(graph):
     nodes = []
@@ -94,7 +89,7 @@ def get_nodes(graph):
 
     return nodes
 
-#######
+
 class TorchProfiler(Profiler):
     def __init__(self, model, data_splits, **kwargs):
         super().__init__(model, data_splits, **kwargs)
@@ -124,39 +119,43 @@ class ComputeComplexity(ProfilerFunction):
         rval = tuple(cls() for cls in sk_cls)
         return rval
 
-    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU, include_weights=True):
+    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU,
+            include_weights=True):
         sk_cls = self._get_bounded_status_keys_cls()
-        rval = self._compute_complexity(model, data_splits['train'], batch_size=batch_size, device=device,
-                                        include_weights=include_weights)
+        rval = self._compute_complexity(model, data_splits['train'],
+                batch_size=batch_size, device=device,
+                include_weights=include_weights)
         assert len(sk_cls) == len(rval)
         return {x.NAME: y for x, y in zip(sk_cls, rval)}
 
 
-    def _compute_complexity(self, model, dataloader, batch_size=1, device=Device.CPU, include_weights=True):
-        temp_model = deepcopy(model)
-        forward_pass = dataloader.forward_pass
+    def _compute_complexity(self, model, dataloader, batch_size=1,
+            device=Device.CPU, include_weights=True):
 
-        # input_shape = [batch_size] + list(trainloader.forward_pass.get_model_input_shapes()[0])
-        inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)[0]
+        inputs = dataloader.forward_pass.create_random_model_inputs(
+                batch_size)[0]
+        params = get_params(model.cpu())
         graph = trace(model.cpu(), inputs)
-
         macs = get_macs(graph)
-        params = get_params(model)
-
-        nodes = get_nodes(graph)
-        placer = Placer(nodes)
-        nodes = placer.place(num_bytes=4)
-        report = Report(nodes, export=True, filename='outmodel')
+        aten_nodes = get_nodes(graph)
+        placer = Placer(aten_nodes)
+        aten_nodes = placer.place(num_bytes=4) # TO-FIX (add bit-width)
+        report = Report(aten_nodes, export=True, filename='outmodel') # filename
         df = report.get_stats()
-        
-        flops = macs / 1e9
+
+        macs /= 1e9
         model_size = (params*4) / (2**20)
         params /= 1e6
         peak_memory = df.ram.max() / (2**20)
-        summary_str = df.to_string()
-        print(summary_str)
+        df_str = df.to_string(header=[
+            'Weight','Bias','Input Shape','Output Shape','In Tensors',
+            'Out Tensors','Active Blocks', 'Memory'], col_space=10,
+            justify='right', max_colwidth=40)
+        ncols = df_str.find('\n') + 1
+        df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
+                df_str[ncols:] + '\n' + '-'*ncols + '\n'
 
-        return macs, params, model_size, peak_memory, summary_str
+        return macs, params, model_size, peak_memory, df_str
 
 
 class ComputeExecutionTime(ProfilerFunction):

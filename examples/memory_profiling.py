@@ -29,7 +29,6 @@ model = get_model_by_name(
     progress=True
 )
 
-
 # Step 2: Create Profiler class and register the profiling functions
 data_loader = TorchProfiler.enable_forward_pass_data_splits(data_splits)
 profiler = TorchProfiler(model, data_loader, name="Original Model")
@@ -40,14 +39,11 @@ profiler.register_profiler_function(
 )
 
 # Step 3: Compute the registered profiler metrics for the PyTorch Model
-profiler.compute_network_status(
+out_data = profiler.compute_network_status(
     batch_size=1,
     device=Device.GPU,
     short_print=True,
     include_weights=True,
     print_mode='info',
 )
-profiler.compute_network_status(batch_size=1, device=Device.GPU,
-short_print=True, include_weights=True, print_mode='debug')
-
-#profiler.compute_network_status(batch_size=1, device=Device.GPU,short_print=True, include_weights=True, print_mode='debug')
+print(out_data['layerwise_summary'])
