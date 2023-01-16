@@ -2,10 +2,11 @@ __all__ = ['Tensor']
 
 
 class Tensor:
-    def __init__(self, name, dtype, shape=None):
+    def __init__(self, name, dtype, shape=None, scope=None):
         self.name = name
         self.dtype = dtype
         self.shape = shape
+        self.scope = scope
 
     @property
     def name(self):

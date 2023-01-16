@@ -14,7 +14,7 @@ class Report:
         df = pd.DataFrame(
                 index=[node.name for node in self.nodes], columns=[
                 'weight', 'bias', 'input_shape', 'output_shape', 'in_tensors', 'out_tensors',
-                'active_blocks', 'ram'] # params
+                'active_blocks', 'scope', 'ram'] # params
                 )
 
         for node in self.nodes:
@@ -27,6 +27,7 @@ class Report:
             df.out_tensors[node.name] = [x.name for x in node.outputs]
             df.active_blocks[node.name] = node.malloc_blocks
             df.ram[node.name] = node.malloc_val
+            df.scope[node.name] = node.scope
 
         if verbose:
             idx_max = df.index[df.ram == df.ram.max()]
