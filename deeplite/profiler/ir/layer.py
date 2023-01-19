@@ -3,11 +3,11 @@ __all__ = ['Layer']
 
 class Layer:
     def __init__(self, name, inputs, outputs, weights=None, bias=None):
-        self.name = name
-        self.inputs = inputs
-        self.outputs = outputs
-        self.weights = weights
-        self.bias = bias
+        self._name = name
+        self._inputs = inputs
+        self._outputs = outputs
+        self._weights = weights
+        self._bias = bias
 
     @property
     def name(self):

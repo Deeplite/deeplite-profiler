@@ -9,7 +9,7 @@ from deeplite.profiler.metrics import *
 from deeplite.profiler.utils import AverageAggregator, Device
 from deeplite.profiler.formatter import getLogger
 
-from deeplite.profiler.trace import trace
+from deeplite.torch_profiler.torch_trace import trace
 from deeplite.profiler.ir import Layer, Tensor
 from deeplite.profiler.memory_allocation.placer import Placer
 from deeplite.profiler.report import Report
