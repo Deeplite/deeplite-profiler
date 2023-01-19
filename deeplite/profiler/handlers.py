@@ -66,12 +66,16 @@ def mul(node):
 
 
 def convolution(node):
-    if node.outputs[0].shape[1] == node.inputs[1].shape[0]:
-        oc, ic, *ks = node.inputs[1].shape
-    else:
-        ic, oc, *ks = node.inputs[1].shape
-    os = node.outputs[0].shape
-    return prod(os) * ic * prod(ks)
+    try:
+        if node.outputs[0].shape[1] == node.inputs[1].shape[0]:
+            oc, ic, *ks = node.inputs[1].shape
+        else:
+            ic, oc, *ks = node.inputs[1].shape
+        os = node.outputs[0].shape
+        return prod(os) * ic * prod(ks)
+    except:
+        breakpoint()
+        return None
 
 
 def norm(node):

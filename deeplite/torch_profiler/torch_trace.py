@@ -26,8 +26,19 @@ def filter_torch_scope(node):
 def trace(model, args=(), kwargs=None):
     assert kwargs is None, 'Keyword arguments are not supported for now. ' \
                            'Please use positional arguments instead!'
-    script = torch.jit.trace(Flatten(model), args, kwargs)
-    graph = script.inlined_graph
+    # get module scope names
+    trace_module_map = {}
+    def register_submods(mod, prefix):
+        for name, child in mod.named_children():
+            submod_qualname = prefix + "." + name
+            trace_module_map[child] = submod_qualname
+            register_submods(child, submod_qualname)
+
+    trace_module_map["__module"] = model
+    torch.jit._trace._trace_module_map = trace_module_map
+    register_submods(model, "__module")
+
+    graph, _ = torch.jit._get_trace_graph(Flatten(model), args, kwargs)
 
     variables = dict()
     for x in graph.nodes():

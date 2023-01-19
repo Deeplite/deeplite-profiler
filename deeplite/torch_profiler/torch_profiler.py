@@ -9,7 +9,7 @@ from deeplite.profiler.metrics import *
 from deeplite.profiler.utils import AverageAggregator, Device
 from deeplite.profiler.formatter import getLogger
 
-from deeplite.profiler.trace import trace
+from deeplite.torch_profiler.torch_trace import trace
 from deeplite.profiler.ir import Layer, Tensor
 from deeplite.profiler.memory_allocation.placer import Placer
 from deeplite.profiler.report import Report
@@ -150,7 +150,7 @@ class ComputeComplexity(ProfilerFunction):
         peak_memory = df.ram.max() / (2**20)
         df_str = df.to_string(header=[
             'Weight','Bias','Input Shape','Output Shape','In Tensors',
-            'Out Tensors','Active Blocks', 'Memory'], col_space=10,
+            'Out Tensors','Active Blocks', 'Scope', 'Memory'], col_space=10,
             justify='right', max_colwidth=40)
         ncols = df_str.find('\n') + 1
         df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \

@@ -21,7 +21,7 @@ class Variable:
 
     @dtype.setter
     def dtype(self, dtype):
-        self._dtype = dtype.lower()
+        self._dtype = dtype.lower() if isinstance(dtype, str) else ''
 
     @property
     def shape(self):
