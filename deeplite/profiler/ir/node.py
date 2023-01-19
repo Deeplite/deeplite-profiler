@@ -3,11 +3,11 @@ __all__ = ['Node']
 
 class Node:
     def __init__(self, operator, attributes, inputs, outputs, scope):
-        self.operator = operator
-        self.attributes = attributes
-        self.inputs = inputs
-        self.outputs = outputs
-        self.scope = scope
+        self._operator = operator
+        self._attributes = attributes
+        self._inputs = inputs
+        self._outputs = outputs
+        self._scope = scope
 
     @property
     def operator(self):

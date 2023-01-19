@@ -3,11 +3,11 @@ __all__ = ['Graph']
 
 class Graph:
     def __init__(self, name, variables, inputs, outputs, nodes):
-        self.name = name
-        self.variables = variables
-        self.inputs = inputs
-        self.outputs = outputs
-        self.nodes = nodes
+        self._name = name
+        self._variables = variables
+        self._inputs = inputs
+        self._outputs = outputs
+        self._nodes = nodes
 
     @property
     def name(self):
