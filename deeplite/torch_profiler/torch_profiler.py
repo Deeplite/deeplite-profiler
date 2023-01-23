@@ -113,7 +113,7 @@ class TorchProfiler(Profiler):
 class ComputeComplexity(ProfilerFunction):
     @classmethod
     def _get_bounded_status_keys_cls(cls):
-        return Flops, TotalParams, ModelSize, MemoryFootprint, LayerwiseSummary
+        return Flops, TotalParams, ModelSize, MemoryFootprint, LayerwiseSummary, LayerwiseData
 
     def get_bounded_status_keys(self):
         sk_cls = self._get_bounded_status_keys_cls()
@@ -156,7 +156,7 @@ class ComputeComplexity(ProfilerFunction):
         df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
                 df_str[ncols:] + '\n' + '-'*ncols + '\n'
 
-        return macs, params, model_size, peak_memory, df_str
+        return macs, params, model_size, peak_memory, df_str, df
 
 
 class ComputeExecutionTime(ProfilerFunction):

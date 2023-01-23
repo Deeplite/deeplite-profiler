@@ -18,7 +18,7 @@ def filter_torch_scope(node):
     raw = node.scopeName()
     raw_split = raw.split('/')
     raw_name = raw_split[-1]
-    mod_name = raw_name.replace('__module.model', '')
+    mod_name = raw_name.replace('__module.', '')
     mod_name = mod_name.strip('.')
     return mod_name
 

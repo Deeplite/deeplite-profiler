@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod, abstractstaticmethod
 from enum import Enum
 
-__all__ = ["Comparative", "LayerwiseSummary", "Flops", "ModelSize", "ExecutionTime", "TotalParams",
+__all__ = ["Comparative", "LayerwiseSummary", "LayerwiseData", "Flops", "ModelSize", "ExecutionTime", "TotalParams",
            "MemoryFootprint", "EvalMetric", "InferenceTime", "DynamicEvalMetric"]
 
 
@@ -43,6 +43,10 @@ class StatusKey(ABC):
 
 class LayerwiseSummary(StatusKey):
     NAME = 'layerwise_summary'
+
+
+class LayerwiseData(StatusKey):
+    NAME = 'layerwise_data'
 
 
 class Metric(StatusKey):
