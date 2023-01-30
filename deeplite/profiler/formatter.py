@@ -96,7 +96,7 @@ class Display:
         self.include_leftovers = include_leftovers
         self.exclude = exclude
 
-    def display_status(self, profiler, other=None, print_mode='debug', short_print=True):
+    def display_status(self, profiler, other=None, print_mode='debug', short_print=True, secondary_eval_metrics=()):
         """
         Beautiful user-friendly display of either one or two dictionaries of profiler status
 
@@ -113,7 +113,7 @@ class Display:
         assert isinstance(print_mode, str) and hasattr(self.logger, print_mode.lower()), \
             "'print_mode' needs to be a logger level"
 
-        display_filter_func = self.make_display_filter_function(profiler, self.order, self.include_leftovers, self.exclude)
+        display_filter_func = self.make_display_filter_function(self.order, self.include_leftovers, self.exclude, secondary_eval_metrics)
         status_dict = profiler.status_to_dict(to_value=False)
         layerwise_summary_1 = status_dict.pop('layerwise_summary', None)
         status_dict = display_filter_func(status_dict)
@@ -139,7 +139,7 @@ class Display:
         getattr(self.logger, print_mode.lower())(summary_str)
 
     @abstractmethod
-    def make_display_filter_function(self, profiler, order=None, include_leftovers=True, exclude=None):
+    def make_display_filter_function(self, order=None, include_leftovers=True, exclude=None, secondary_eval_metrics=()):
         """
         Create the display function. The default order displayed on the table is like this:
                 - Evaluation Metric
@@ -176,14 +176,10 @@ class Display:
 
 
 class DefaultDisplay(Display):
-    def make_display_filter_function(self, profiler, order=None, include_leftovers=True, exclude=None):
-        eval_pfr = profiler.get_eval_pfr()
-        secondary_metrics = ()
-        if eval_pfr:
-            secondary_metrics += tuple([m.NAME for m in eval_pfr.function.secondary_metrics])
+    def make_display_filter_function(self, order=None, include_leftovers=True, exclude=None, secondary_eval_metrics=()):
         def order_iter():
             if order is None:
-                _order = ('eval_metric',) + secondary_metrics
+                _order = ('eval_metric',) + secondary_eval_metrics
                 _order += ('model_size', 'flops', 'total_params', 'memory_footprint', 'execution_time', 'inference_time')
             else:
                 _order = order

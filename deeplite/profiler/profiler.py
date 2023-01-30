@@ -253,7 +253,8 @@ class Profiler(ABC):
         """
         # NOTE: force pop layerwise summary and display in debug mode as it is quite long regardless
         # of the display filter function.
-        self.display.display_status(self, other, print_mode, short_print)
+        secondary_eval_metrics = self._get_secondary_eval_metrics()
+        self.display.display_status(self, other, print_mode, short_print, secondary_eval_metrics)
 
     def clone(self, model=None, data_splits=None, retain_status=False):
         # create a new instance instead of deepcopying stuff
@@ -266,16 +267,30 @@ class Profiler(ABC):
         new.backend = self.backend
         return new
 
-    def get_eval_pfr(self):
+    def _get_eval_pfr(self):
         for pfr in self._profiling_functions_register.values():
             if isinstance(pfr.function, ComputeEvalMetric):
                 return pfr
 
     def add_secondary_eval_metric(self, key, unit_name=None, description=None, comparative=None):
-        eval_pfr = self.get_eval_pfr()
+        """
+        Add an additional eval metric to the profiler's display
+        :param key: key of the metric in the dictionary returned by the EvaluationFunction
+        """
+        eval_pfr = self._get_eval_pfr()
         eval_pfr.function.add_secondary_metric(key, unit_name, description, comparative)
         secondary_eval_metric = eval_pfr.function.secondary_metrics[-1]
         self._register_status_key(secondary_eval_metric, eval_pfr.function, eval_pfr.overriding)
+
+    def _get_secondary_eval_metrics(self):
+        """
+        Return the names of all secondary eval metrics
+        """
+        eval_pfr = self._get_eval_pfr()
+        secondary_metric_names = ()
+        if eval_pfr:
+            secondary_metric_names += tuple([m.NAME for m in eval_pfr.function.secondary_metrics])
+        return secondary_metric_names
 
     # Below are methods to give dict-like access to the internal status storage.
     # Everything is returned as new iterable in order to make sure nothing external
