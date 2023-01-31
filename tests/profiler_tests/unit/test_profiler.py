@@ -66,6 +66,8 @@ class TestProfiler(BaseUnitTest):
             return {'a': 10, 'b': 20, 'c': 30, 'd': 40}
 
         profiler = get_profiler()
+        with pytest.raises(ValueError):
+            profiler.add_secondary_eval_metric('c')
         profiler.display.exclude = 'c'
         compute_eval = ComputeEvalMetric(evaluate, key='a', default_split='train')
         compute_eval.add_secondary_metric('b')

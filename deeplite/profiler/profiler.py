@@ -278,6 +278,9 @@ class Profiler(ABC):
         :param key: key of the metric in the dictionary returned by the EvaluationFunction
         """
         eval_pfr = self._get_eval_pfr()
+        if not eval_pfr:
+            raise ValueError(("Cannot add secondary metrics without evaluation function. \n"
+                              "Register an evaluation function before adding secondary metrics"))
         eval_pfr.function.add_secondary_metric(key, unit_name, description, comparative)
         secondary_eval_metric = eval_pfr.function.secondary_metrics[-1]
         self._register_status_key(secondary_eval_metric, eval_pfr.function, eval_pfr.overriding)
