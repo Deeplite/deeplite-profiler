@@ -5,8 +5,7 @@ from inspect import signature, Parameter
 import time
 
 from .evaluate import EvaluationFunction
-from .formatter import getLogger, \
-    DefaultDisplay
+from .formatter import getLogger, DefaultDisplay
 from .metrics import EvalMetric, DynamicEvalMetric, InferenceTime, Comparative
 from .utils import cast_tuple
 
@@ -16,6 +15,7 @@ _ProfilerFunctionRegister = namedtuple("_ProfilerFunctionRegister", ('function',
                                        module=__name__)
 
 default_display = DefaultDisplay(logger)
+
 
 class Profiler(ABC):
     """
