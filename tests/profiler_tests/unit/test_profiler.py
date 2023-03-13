@@ -2,7 +2,7 @@ import pytest
 from tests.profiler_tests.unit import BaseUnitTest
 from unittest import mock
 
-from deeplite.profiler.formatter import getLogger, setLogger, make_display_filter_function
+from deeplite.profiler.formatter import getLogger, setLogger
 from deeplite.profiler.profiler import Profiler, ProfilerFunction, ExternalProfilerFunction, ComputeEvalMetric
 from deeplite.profiler.metrics import *
 
@@ -66,11 +66,13 @@ class TestProfiler(BaseUnitTest):
             return {'a': 10, 'b': 20, 'c': 30, 'd': 40}
 
         profiler = get_profiler()
-        profiler.display_status_filter_func = make_display_filter_function(exclude='c')
+        with pytest.raises(ValueError):
+            profiler.add_secondary_eval_metric('c')
+        profiler.display.exclude = 'c'
         compute_eval = ComputeEvalMetric(evaluate, key='a', default_split='train')
         compute_eval.add_secondary_metric('b')
-        compute_eval.add_secondary_metric('c')
         profiler.register_profiler_function(compute_eval)
+        profiler.add_secondary_eval_metric('c')
 
         status = profiler.compute_network_status()
         assert 'inference_time' in status
