@@ -58,11 +58,16 @@ def get_nodes(graph):
                 inputs.append(Tensor(name=node.inputs[0].name,
                         dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
             elif 'mm' in node.operator:
+                # breakpoint()
                 weights = node.inputs[2].shape
                 if node.inputs[0].shape is not None:
                     bias = node.inputs[0].shape
                 inputs.append(Tensor(name=node.inputs[1].name,
                         dtype=node.inputs[1].dtype, shape=node.inputs[1].shape, scope=node.scope))
+            elif 'matmul' in node.operator:
+                weights = node.inputs[1].shape
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
             elif node.operator in ['aten::batch_norm', 'aten::instance_norm']:
                 if node.inputs[1].shape is not None:
                     weights = node.inputs[1].shape # to double-chek
@@ -75,6 +80,8 @@ def get_nodes(graph):
                     bias = node.inputs[2].shape # ???
                 inputs.append(Tensor(name=node.inputs[0].name,
                         dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
+            elif node.operator == 'aten::t':  # skip weight transpose, shouldn't be present
+                continue
             else:
                 for x in node.inputs:
                     if x.shape is not None:
