@@ -21,17 +21,43 @@ logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
 
-def get_params(model):
-    return sum(param.numel() for param in model.parameters())
+def get_params(model, node_complexity_map):  # for each module check for hook? They can be registered like handles
+    total = 0
+    counted_params = set()
+    for name, module in model.named_modules():
+        if name in node_complexity_map:
+            param_scale = node_complexity_map[name]['param_size']
+            for p in module.parameters():
+                print(p)
+                if p.requires_grad:
+                    counted_params.add(p)
+                    total += p.numel() * param_scale
+    for p in model.parameters():
+        if p.requires_grad and p not in counted_params:
+            total += p.numel()
+    return total
 
-def get_macs(graph, reduction=sum):
+
+# TODO
+# need to replace the handle used here to calculate macs?
+# so register the unique one and access it here
+# we only have access to graph here, so might need to store more info in node?
+# or during trace, grab node name and custom handle and check for it here
+# can just use compute complexity as is, just need the inputs, oputputs, though
+# might be easier to pass inputs, outputs during trace since they are present,
+# in which case we just save the results during trace and retrieve results here
+# ecah individual profiler (associated with one model) would need to store a dict with
+# these custom results results results results results results results results result result result
+def get_macs(graph, node_complexity_map, reduction=sum):
     results = dict()
     for node in graph.nodes:
         for operators, func in handlers:
             if isinstance(operators, str):
                 operators = [operators]
             if node.operator in operators:
-                if func is not None:
+                if node.scope in node_complexity_map:
+                    results[node] = node_complexity_map[node.scope]['flops']
+                elif func is not None:  # otherwise we need to use the cached data?
                     results[node] = func(node)
                 break
         else:
@@ -58,7 +84,6 @@ def get_nodes(graph):
                 inputs.append(Tensor(name=node.inputs[0].name,
                         dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
             elif 'mm' in node.operator:
-                # breakpoint()
                 weights = node.inputs[2].shape
                 if node.inputs[0].shape is not None:
                     bias = node.inputs[0].shape
@@ -142,19 +167,21 @@ class ComputeComplexity(ProfilerFunction):
 
         inputs = dataloader.forward_pass.create_random_model_inputs(
                 batch_size)[0]
-        params = get_params(model.cpu())
-        graph = trace(model.cpu(), inputs)
-        macs = get_macs(graph)
+        node_complexity_map = {}
+        graph = trace(model.cpu(), inputs, node_complexity_map)
         aten_nodes = get_nodes(graph)
         placer = Placer(aten_nodes)
-        aten_nodes = placer.place(num_bytes=4) # TO-FIX (add bit-width)
+        aten_nodes = placer.place(num_bytes=4)
         report = Report(aten_nodes, export=True, filename='outmodel') # filename
         df = report.get_stats()
 
+        params = get_params(model.cpu(), node_complexity_map)
+        macs = get_macs(graph, node_complexity_map)  # no bias info here?
         macs /= 1e9
         model_size = (params*4) / (2**20)
         params /= 1e6
         peak_memory = df.ram.max() / (2**20)
+        #TODO maybe don't print active blocks for general use. Just make it available through layerwise_data
         df_str = df.to_string(header=[
             'Weight','Bias','Input Shape','Output Shape','In Tensors',
             'Out Tensors','Active Blocks', 'Scope', 'Memory'], col_space=10,

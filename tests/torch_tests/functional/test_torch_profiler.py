@@ -4,7 +4,7 @@ from copy import deepcopy
 from deeplite.profiler.evaluate import EvaluationFunction
 from deeplite.profiler import ComputeEvalMetric
 from deeplite.profiler.metrics import Comparative
-from tests.torch_tests.functional import BaseFunctionalTest, TORCH_AVAILABLE, MODEL, get_profiler
+from tests.torch_tests.functional import BaseFunctionalTest, TORCH_AVAILABLE, MODEL, get_profiler, get_custom_profiler
 from unittest import mock
 
 class TestTorchProfiler(BaseFunctionalTest):
@@ -61,6 +61,15 @@ class TestTorchProfiler(BaseFunctionalTest):
         profiler.register_profiler_function(ComputeComplexity())
         profiler.compute_network_status()
 
+    def test_custom_conv(self, *args):
+        from deeplite.torch_profiler.torch_profiler import ComputeComplexity
+        profiler = get_custom_profiler()
+        profiler.register_profiler_function(ComputeComplexity())
+        profiler.compute_network_status()
+        assert profiler.status_get('model_size') == None
+        assert profiler.status_get('flops') == None
+        # print(profiler.status_get('flops'))
+        # print(profiler.status_get('model_size'))
 
     @mock.patch('deeplite.profiler.utils.AverageAggregator.get', return_value=2)
     def test_compute_network_status(self, *args):
@@ -70,7 +79,8 @@ class TestTorchProfiler(BaseFunctionalTest):
         profiler = get_profiler()
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
                                                  include_weights=True, print_mode='debug')
-        assert(status['flops'] == 0.002555904)
+        # print(status['layerwise_summary'])
+        assert(status['flops'] == 0.002555904)  #TODO failing
         assert(status['total_params'] == 0.002432)
         assert(status['execution_time'] == 2000)
         assert(status['model_size'] == 0.00927734375)
@@ -90,7 +100,7 @@ class TestTorchProfiler(BaseFunctionalTest):
         assert profiler.status_get('layerwise_summary') is not None
         assert profiler2.status_get('layerwise_summary') is not None
         assert all(v1 == v2 for (k1, v1), (k2, v2) in zip(profiler.status_items(), profiler2.status_items())
-                   if k1 not in ('layerwise_summary', 'inference_time', 'execution_time'))
+                   if k1 not in ('layerwise_summary', 'inference_time', 'execution_time', 'layerwise_data'))
 
     def test_secondary_eval_override(self, *args):
         profiler = get_profiler()
@@ -105,7 +115,7 @@ class TestTorchProfiler(BaseFunctionalTest):
         eval_profiler.add_secondary_metric('c', 'ms', 'milliseconds', Comparative.DIV)
         profiler.register_profiler_function(eval_profiler, override=True)
         profiler.compute_status('eval_metric')
-        profiler.display_status()
+        profiler.display_status(short_print=False)
         assert profiler.status_get('eval_metric') == rval['acc']
         assert profiler.status_get('b') == rval['b']
         assert profiler.status_get('c') == rval['c']

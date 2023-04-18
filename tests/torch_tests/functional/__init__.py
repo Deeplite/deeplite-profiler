@@ -47,6 +47,15 @@ def get_profiler():
     profiler.register_profiler_function(ComputeEvalMetric(get_missclass, 'missclass', unit_name='%'))
     return profiler
 
+def get_custom_profiler():
+    data = TorchProfiler.enable_forward_pass_data_splits(DATA)
+
+    profiler = TorchProfiler(CUSTOM_MODEL, data)
+    profiler.register_profiler_function(ComputeComplexity())
+    profiler.register_profiler_function(ComputeExecutionTime())
+    profiler.register_profiler_function(ComputeEvalMetric(get_missclass, 'missclass', unit_name='%'))
+    return profiler
+
 if TORCH_AVAILABLE:
     import torch
     import torch.nn as nn
@@ -57,6 +66,20 @@ if TORCH_AVAILABLE:
     MODEL = nn.Sequential(
         nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
         nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Flatten(),
+    )
+
+    class CustomConv(nn.Conv2d):
+        def compute_module_complexity(self, inputs, outputs):
+            return dict(flops=10,
+                    param_size=2 / 8,
+                    activation_size=4 / 8)
+
+    CUSTOM_MODEL = nn.Sequential(
+        nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
+        nn.ReLU(),
+        CustomConv(32,32,kernel_size=3, groups=32),
         nn.MaxPool2d(kernel_size=2, stride=2),
         nn.Flatten(),
     )
