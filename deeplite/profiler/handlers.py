@@ -4,7 +4,7 @@ from functools import reduce
 __all__ = ['handlers']
 
 def prod(iterable):
-        return reduce(operator.mul, iterable, 1)
+    return reduce(operator.mul, iterable, 1)
 
 def addmm(node):
     # [n, p] = aten::addmm([n, p], [n, m], [m, p], *, *)
@@ -72,9 +72,12 @@ def convolution(node):
         else:
             ic, oc, *ks = node.inputs[1].shape
         os = node.outputs[0].shape
-        return prod(os) * ic * prod(ks)
+        conv_flops =  prod(os) * ic * prod(ks)
+        if node.inputs[2] is not None:
+            bias_flops = prod(os)
+            return conv_flops + bias_flops
+        return conv_flops
     except:
-        breakpoint()
         return None
 
 
@@ -95,30 +98,44 @@ def avg_pool_or_mean(node):
     return prod(os)
 
 
-def leaky_relu(node):
+def relu(node):
     os = node.outputs[0].shape
     return prod(os)
+
+
+def pool(node):
+    i_s = node.inputs[0].shape
+    return prod(i_s)
 
 
 def upsample_bilinear2d(node):
     os = node.outputs[0].shape
     return prod(os) * 4
 
+# def softmax
 
+# add relu, softmax sigmoid
+
+
+#TODO this list is torch specific, so move to torch profiler
+#TODO add method for registering new handlers
 handlers = (
     ('aten::addmm', addmm),
     ('aten::addmv', addmv),
     ('aten::bmm', bmm),
     (('aten::linear', 'aten::matmul'), matmul),
     (('aten::mul', 'aten::mul_'), mul),
-    ('aten::_convolution', convolution),
+    (('aten::_convolution', 'aten::conv1d', 'aten::conv3d', 'aten:conv_transpose1d',
+     'aten:conv_transpose2d', 'aten:conv_transpose3d'), convolution),
     (('aten::batch_norm', 'aten::instance_norm', 'aten::layer_norm',
       'aten::group_norm'), norm),
     (('aten::adaptive_avg_pool1d', 'aten::adaptive_avg_pool2d',
       'aten::adaptive_avg_pool3d', 'aten::avg_pool1d', 'aten::avg_pool2d',
       'aten::avg_pool3d', 'aten::mean'), avg_pool_or_mean),
-    ('aten::leaky_relu', leaky_relu),
+    (('aten::leaky_relu', 'aten::relu', 'aten::relu_', 'aten::relu6', 'aten::prelu', 'aten::elu'), relu),
     ('aten::upsample_bilinear2d', upsample_bilinear2d),
+    (('aten::max_pool1d', 'aten::max_pool2d', 'aten::max_pool3d',
+      'aten::avg_pool1d', 'aten::avg_pool2d', 'aten::avg_pool3d'), pool),
     (('aten::adaptive_max_pool1d', 'aten::adaptive_max_pool2d',
       'aten::adaptive_max_pool3d', 'aten::add', 'aten::add_',
       'aten::alpha_dropout', 'aten::cat', 'aten::chunk', 'aten::clamp',
@@ -131,8 +148,7 @@ handlers = (
       'aten::max_pool2d', 'aten::max_pool2d_with_indices', 'aten::max_pool3d',
       'aten::max_pool3d_with_indices', 'aten::max_unpool1d',
       'aten::max_unpool2d', 'aten::max_unpool3d', 'aten::ne',
-      'aten::reflection_pad1d', 'aten::reflection_pad2d',
-      'aten::reflection_pad3d', 'aten::relu', 'aten::relu_',
+      'aten::reflection_pad1d', 'aten::reflection_pad2d', 'aten::reflection_pad3d',
       'aten::replication_pad1d', 'aten::replication_pad2d',
       'aten::replication_pad3d', 'aten::rsub', 'aten::select', 'aten::sigmoid',
       'aten::size', 'aten::slice', 'aten::softmax', 'aten::softshrink',

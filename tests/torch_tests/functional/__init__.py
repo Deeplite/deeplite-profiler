@@ -72,14 +72,13 @@ if TORCH_AVAILABLE:
 
     class CustomConv(nn.Conv2d):
         def compute_module_complexity(self, inputs, outputs):
-            return dict(flops=10,
+            return dict(flops=0,
                     param_size=2 / 8,
                     activation_size=4 / 8)
 
     CUSTOM_MODEL = nn.Sequential(
-        nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
+        CustomConv(3, 32, kernel_size=5, stride=1, padding=2),
         nn.ReLU(),
-        CustomConv(32,32,kernel_size=3, groups=32),
         nn.MaxPool2d(kernel_size=2, stride=2),
         nn.Flatten(),
     )

@@ -38,16 +38,6 @@ def get_params(model, node_complexity_map):  # for each module check for hook? T
     return total
 
 
-# TODO
-# need to replace the handle used here to calculate macs?
-# so register the unique one and access it here
-# we only have access to graph here, so might need to store more info in node?
-# or during trace, grab node name and custom handle and check for it here
-# can just use compute complexity as is, just need the inputs, oputputs, though
-# might be easier to pass inputs, outputs during trace since they are present,
-# in which case we just save the results during trace and retrieve results here
-# ecah individual profiler (associated with one model) would need to store a dict with
-# these custom results results results results results results results results result result result
 def get_macs(graph, node_complexity_map, reduction=sum):
     results = dict()
     for node in graph.nodes:
@@ -164,9 +154,8 @@ class ComputeComplexity(ProfilerFunction):
 
     def _compute_complexity(self, model, dataloader, batch_size=1,
             device=Device.CPU, include_weights=True):
-
-        inputs = dataloader.forward_pass.create_random_model_inputs(
-                batch_size)[0]
+        inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)
+        assert isinstance(inputs, tuple)
         node_complexity_map = {}
         graph = trace(model.cpu(), inputs, node_complexity_map)
         aten_nodes = get_nodes(graph)
@@ -181,7 +170,7 @@ class ComputeComplexity(ProfilerFunction):
         model_size = (params*4) / (2**20)
         params /= 1e6
         peak_memory = df.ram.max() / (2**20)
-        #TODO maybe don't print active blocks for general use. Just make it available through layerwise_data
+        #TODO maybe don't print active blocks, input, output nodes for general use. Just make it available through layerwise_data
         df_str = df.to_string(header=[
             'Weight','Bias','Input Shape','Output Shape','In Tensors',
             'Out Tensors','Active Blocks', 'Scope', 'Memory'], col_space=10,

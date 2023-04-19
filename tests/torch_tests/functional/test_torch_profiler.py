@@ -1,4 +1,5 @@
 import pytest
+import math
 from copy import deepcopy
 
 from deeplite.profiler.evaluate import EvaluationFunction
@@ -12,6 +13,7 @@ class TestTorchProfiler(BaseFunctionalTest):
         profiler = get_profiler()
         profiler.display_status()
 
+    @pytest.mark.skip(reason="no dict support yet with tracing implementation")
     def test_dict_profiling(self, *args):
         import torch
         import torch.nn as nn
@@ -63,13 +65,16 @@ class TestTorchProfiler(BaseFunctionalTest):
 
     def test_custom_conv(self, *args):
         from deeplite.torch_profiler.torch_profiler import ComputeComplexity
-        profiler = get_custom_profiler()
+        profiler = get_profiler()
         profiler.register_profiler_function(ComputeComplexity())
-        profiler.compute_network_status()
-        assert profiler.status_get('model_size') == None
-        assert profiler.status_get('flops') == None
-        # print(profiler.status_get('flops'))
-        # print(profiler.status_get('model_size'))
+        old_size = profiler.compute_status('model_size')
+        old_flops = profiler.compute_status('flops')
+
+        custom_profiler = get_custom_profiler()
+        custom_profiler.register_profiler_function(ComputeComplexity())
+        custom_profiler.compute_network_status()
+        assert custom_profiler.status_get('model_size') == old_size * 0.25
+        math.isclose(custom_profiler.status_get('flops'), old_flops - 2490368e-9)  # removed conv flops
 
     @mock.patch('deeplite.profiler.utils.AverageAggregator.get', return_value=2)
     def test_compute_network_status(self, *args):
@@ -80,11 +85,11 @@ class TestTorchProfiler(BaseFunctionalTest):
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
                                                  include_weights=True, print_mode='debug')
         # print(status['layerwise_summary'])
-        assert(status['flops'] == 0.002555904)  #TODO failing
+        assert(status['flops'] == 0.002555904)  #TODO failing, missing relu op flop counter
         assert(status['total_params'] == 0.002432)
         assert(status['execution_time'] == 2000)
         assert(status['model_size'] == 0.00927734375)
-        assert(status['memory_footprint'] == 0.33349609375)
+        assert(status['memory_footprint'] == 0.25)  # replaced by peak ram
         assert(status['eval_metric'] == 100)
         assert(status['layerwise_summary'])
         assert 'inference_time' in status

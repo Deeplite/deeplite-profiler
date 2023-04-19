@@ -50,9 +50,6 @@ class custom_complexity_hook(object):
 
 
 def trace(model, args=(), node_complexity_map=None):
-    # assert kwargs is None, 'Keyword arguments are not supported for now. ' \
-    #                        'Please use positional arguments instead!'
-    # get module scope names
     trace_module_map = {}
     def register_submods(mod, prefix):
         for name, child in mod.named_children():
