@@ -13,7 +13,7 @@ from deeplite.torch_profiler.torch_trace import trace
 from deeplite.profiler.ir import Layer, Tensor
 from deeplite.profiler.memory_allocation.placer import Placer
 from deeplite.profiler.report import Report
-from deeplite.profiler.handlers import handlers
+from deeplite.torch_profiler.torch_handlers import torch_handlers
 
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
@@ -41,7 +41,7 @@ def get_params(model, node_complexity_map):  # for each module check for hook? T
 def get_macs(graph, node_complexity_map, reduction=sum):
     results = dict()
     for node in graph.nodes:
-        for operators, func in handlers:
+        for operators, func in torch_handlers:
             if isinstance(operators, str):
                 operators = [operators]
             if node.operator in operators:

@@ -1,7 +1,7 @@
 import operator
 from functools import reduce
 
-__all__ = ['handlers']
+__all__ = ['torch_handlers']
 
 def prod(iterable):
     return reduce(operator.mul, iterable, 1)
@@ -112,14 +112,8 @@ def upsample_bilinear2d(node):
     os = node.outputs[0].shape
     return prod(os) * 4
 
-# def softmax
 
-# add relu, softmax sigmoid
-
-
-#TODO this list is torch specific, so move to torch profiler
-#TODO add method for registering new handlers
-handlers = (
+torch_handlers = (
     ('aten::addmm', addmm),
     ('aten::addmv', addmv),
     ('aten::bmm', bmm),
