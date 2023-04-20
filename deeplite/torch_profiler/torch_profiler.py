@@ -28,7 +28,6 @@ def get_params(model, node_complexity_map):  # for each module check for hook? T
         if name in node_complexity_map:
             param_scale = node_complexity_map[name]['param_size']
             for p in module.parameters():
-                print(p)
                 if p.requires_grad:
                     counted_params.add(p)
                     total += p.numel() * param_scale
@@ -50,9 +49,9 @@ def get_macs(graph, node_complexity_map, reduction=sum):
                 elif func is not None:  # otherwise we need to use the cached data?
                     results[node] = func(node)
                 break
-        else:
-            warnings.warn('No handlers found: "{}". Skipped.'.format(
-                node.operator))
+        # else:
+        #     warnings.warn('No handlers found: "{}". Skipped.'.format(
+        #         node.operator))
 
     if reduction is not None:
         return reduction(results.values())
@@ -133,6 +132,10 @@ class TorchProfiler(Profiler):
 
 
 class ComputeComplexity(ProfilerFunction):
+    def __init__(self, export=False):
+        super().__init__()
+        self.export = export
+
     @classmethod
     def _get_bounded_status_keys_cls(cls):
         return Flops, TotalParams, ModelSize, MemoryFootprint, LayerwiseSummary, LayerwiseData
@@ -161,7 +164,7 @@ class ComputeComplexity(ProfilerFunction):
         aten_nodes = get_nodes(graph)
         placer = Placer(aten_nodes)
         aten_nodes = placer.place(num_bytes=4)
-        report = Report(aten_nodes, export=True, filename='outmodel') # filename
+        report = Report(aten_nodes, export=self.export, filename='outmodel') # filename
         df = report.get_stats()
 
         params = get_params(model.cpu(), node_complexity_map)
@@ -170,15 +173,13 @@ class ComputeComplexity(ProfilerFunction):
         model_size = (params*4) / (2**20)
         params /= 1e6
         peak_memory = df.ram.max() / (2**20)
-        #TODO maybe don't print active blocks, input, output nodes for general use. Just make it available through layerwise_data
-        df_str = df.to_string(header=[
-            'Weight','Bias','Input Shape','Output Shape','In Tensors',
-            'Out Tensors','Active Blocks', 'Scope', 'Memory'], col_space=10,
-            justify='right', max_colwidth=40)
+
+        keys = ['weight', 'input_shape', 'output_shape', 'scope', 'ram']
+        header = ['Weight', 'Input Shape','Output Shape', 'Scope', 'Memory']
+        df_str = df[keys].to_string(header=header, col_space=10, justify='right', max_colwidth=40)
         ncols = df_str.find('\n') + 1
         df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
                 df_str[ncols:] + '\n' + '-'*ncols + '\n'
-
         return macs, params, model_size, peak_memory, df_str, df
 
 
