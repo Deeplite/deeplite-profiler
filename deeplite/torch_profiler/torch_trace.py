@@ -23,30 +23,25 @@ def filter_torch_scope(node):
     return mod_name
 
 
-class custom_complexity_hook(object):
-    def __init__(self, node_complexity_map):
-        self.backup = None
-        self.node_complexity_map = node_complexity_map
+def get_module_complexity_map(model, args, complexity_map):
+    """
+    Performs one forward pass of model to calculate layer computational complexities
 
-    def __enter__(self):
-        def _slow_forward(self_, *input, **kwargs):  # self_ is module
-            result = self.backup(self_, *input, **kwargs)
-            if hasattr(self_, 'compute_module_complexity'):
-                rval = self_.compute_module_complexity(input, result, **kwargs)
-                # what to give it as a key?
-                recording_scopes = torch.jit._trace._trace_module_map is not None
-                if recording_scopes:
-                    key = torch.jit._trace._trace_module_map[self_]
-                    self.node_complexity_map[key] = rval
+    Only calculates complexities for layers with 'compute_module_complexity' implementation
+    """
+    module_to_scope = {}
+    handles = []
+    def hookem(module, x, y):
+        complexity_map[module_to_scope[module]] = module.compute_module_complexity(x, y)
 
-            return result
-
-        self.backup = torch.nn.Module._slow_forward
-        setattr(torch.nn.Module, '_slow_forward', _slow_forward)
-
-    def __exit__(self, type, value, tb):
-        setattr(torch.nn.Module, '_slow_forward', self.backup)
-
+    for n, m in model.named_modules():
+        if hasattr(m, 'compute_module_complexity'):
+            handles.append(m.register_forward_hook(hookem))
+            module_to_scope[m] = n
+    model(*args)
+    for h in handles:
+        h.remove()
+    return complexity_map
 
 
 def trace(model, args=(), node_complexity_map=None):
@@ -61,9 +56,8 @@ def trace(model, args=(), node_complexity_map=None):
     torch.jit._trace._trace_module_map = trace_module_map
     register_submods(model, "__module")
 
-    with custom_complexity_hook(node_complexity_map) as work:
-        graph, _ = torch.jit._get_trace_graph(Flatten(model), args, kwargs=None)
-
+    node_complexity_map = get_module_complexity_map(model, args, node_complexity_map)
+    graph, _ = torch.jit._get_trace_graph(Flatten(model), args, kwargs=None)
     variables = dict()
     for x in graph.nodes():
         for v in list(x.inputs()) + list(x.outputs()):
@@ -81,15 +75,7 @@ def trace(model, args=(), node_complexity_map=None):
 
     nodes = []
     for x in graph.nodes():
-        raw_scope = x.scopeName()
         scope = filter_torch_scope(x)
-        if raw_scope in node_complexity_map:
-            if scope not in node_complexity_map:
-                node_complexity_map[scope] = node_complexity_map[raw_scope]
-                assert raw_scope != scope
-                node_complexity_map.pop(raw_scope)
-            else:
-                raise RuntimeError("Repeated module complexity functions")
         node = Node(
             operator=x.kind(),
             attributes={
