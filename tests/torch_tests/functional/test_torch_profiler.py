@@ -85,7 +85,7 @@ class TestTorchProfiler(BaseFunctionalTest):
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
                                                  include_weights=True, print_mode='debug')
         # print(status['layerwise_summary'])
-        assert(status['flops'] == 0.002555904)  #TODO failing, missing relu op flop counter
+        assert(status['flops'] == 0.002555904)
         assert(status['total_params'] == 0.002432)
         assert(status['execution_time'] == 2000)
         assert(status['model_size'] == 0.00927734375)
