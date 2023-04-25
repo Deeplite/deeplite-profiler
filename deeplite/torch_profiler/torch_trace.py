@@ -56,8 +56,8 @@ def trace(model, args=(), node_complexity_map=None):
     torch.jit._trace._trace_module_map = trace_module_map
     register_submods(model, "__module")
 
-    node_complexity_map = get_module_complexity_map(model, args, node_complexity_map)
-    graph, _ = torch.jit._get_trace_graph(Flatten(model), args, kwargs=None)
+    with torch.no_grad():
+        graph, _ = torch.jit._get_trace_graph(Flatten(model), args, kwargs=None)
     variables = dict()
     for x in graph.nodes():
         for v in list(x.inputs()) + list(x.outputs()):

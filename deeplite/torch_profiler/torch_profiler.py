@@ -157,6 +157,7 @@ class ComputeComplexity(ProfilerFunction):
 
     def _compute_complexity(self, model, dataloader, batch_size=1,
             device=Device.CPU, include_weights=True):
+        model.eval()
         inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)
         assert isinstance(inputs, tuple)
         node_complexity_map = {}
