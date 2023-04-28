@@ -26,7 +26,9 @@ def get_params(model, node_complexity_map):  # for each module check for hook? T
     counted_params = set()
     for name, module in model.named_modules():
         if name in node_complexity_map:
-            param_scale = node_complexity_map[name]['param_size']
+            param_scale = node_complexity_map[name].get('param_size', None)
+            if param_scale is None:
+                raise RuntimeError('Invalid compute_module_complexity() output')
             for p in module.parameters():
                 if p.requires_grad:
                     counted_params.add(p)
@@ -45,8 +47,11 @@ def get_macs(graph, node_complexity_map, reduction=sum):
                 operators = [operators]
             if node.operator in operators:
                 if node.scope in node_complexity_map:
-                    results[node] = node_complexity_map[node.scope]['flops']
-                elif func is not None:  # otherwise we need to use the cached data?
+                    flops = node_complexity_map[node.scope].get('flops', None)
+                    if flops is None:
+                        raise RuntimeError('Invalid compute_module_complexity() output')
+                    results[node] = flops
+                elif func is not None:
                     results[node] = func(node)
                 break
         # else:
@@ -166,10 +171,10 @@ class ComputeComplexity(ProfilerFunction):
         placer = Placer(aten_nodes)
         aten_nodes = placer.place(num_bytes=4)
         report = Report(aten_nodes, export=self.export, filename='outmodel') # filename
-        df = report.get_stats()
+        df = report.get_stats(verbose=self.export)
 
         params = get_params(model.cpu(), node_complexity_map)
-        macs = get_macs(graph, node_complexity_map)  # no bias info here?
+        macs = get_macs(graph, node_complexity_map)
         macs /= 1e9
         model_size = (params*4) / (2**20)
         params /= 1e6

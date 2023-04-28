@@ -5,7 +5,7 @@ from copy import deepcopy
 from deeplite.profiler.evaluate import EvaluationFunction
 from deeplite.profiler import ComputeEvalMetric
 from deeplite.profiler.metrics import Comparative
-from tests.torch_tests.functional import BaseFunctionalTest, TORCH_AVAILABLE, MODEL, get_profiler, get_custom_profiler
+from tests.torch_tests.functional import BaseFunctionalTest, MODEL, get_profiler
 from unittest import mock
 
 class TestTorchProfiler(BaseFunctionalTest):
@@ -64,17 +64,18 @@ class TestTorchProfiler(BaseFunctionalTest):
         profiler.compute_network_status()
 
     def test_custom_conv(self, *args):
-        from deeplite.torch_profiler.torch_profiler import ComputeComplexity
         profiler = get_profiler()
-        profiler.register_profiler_function(ComputeComplexity())
         old_size = profiler.compute_status('model_size')
         old_flops = profiler.compute_status('flops')
 
-        custom_profiler = get_custom_profiler()
-        custom_profiler.register_profiler_function(ComputeComplexity())
+        custom_profiler = get_profiler('custom')
         custom_profiler.compute_network_status()
         assert custom_profiler.status_get('model_size') == old_size * 0.25
         math.isclose(custom_profiler.status_get('flops'), old_flops - 2490368e-9)  # removed conv flops
+
+    def test_handlers(self, *args):
+        profiler = get_profiler('coverage', export=True)
+        profiler.compute_network_status()
 
     @mock.patch('deeplite.profiler.utils.AverageAggregator.get', return_value=2)
     def test_compute_network_status(self, *args):
