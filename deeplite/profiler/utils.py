@@ -8,6 +8,14 @@ class Device(Enum):
     CPU = 'cpu'
     GPU = 'gpu'
 
+    @classmethod
+    def _missing_(cls, value):
+        value = value.lower()
+        for member in cls:
+            if member.value == value:
+                return member
+        return None
+
 
 class Aggregator(ABC):
     __slots__ = tuple()
