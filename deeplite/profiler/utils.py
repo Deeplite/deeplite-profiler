@@ -14,7 +14,7 @@ class Device(Enum):
         for member in cls:
             if member.value == value:
                 return member
-        return None
+        raise ValueError("{} is not a valid Device").format(value)
 
 
 class Aggregator(ABC):
