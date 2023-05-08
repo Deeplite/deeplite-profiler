@@ -1,21 +1,120 @@
 from copy import deepcopy
 import time
 import sys
-
-import numpy as np
-from thirdparty import ptflops as flops_counter
 import torch
+import warnings
 
 from deeplite.profiler import Profiler, ProfilerFunction
 from deeplite.profiler.metrics import *
 from deeplite.profiler.utils import AverageAggregator, Device
 from deeplite.profiler.formatter import getLogger
 
+from deeplite.torch_profiler.torch_trace import trace
+from deeplite.profiler.ir import Layer, Tensor
+from deeplite.profiler.memory_allocation.placer import Placer
+from deeplite.profiler.report import Report
+from deeplite.torch_profiler.torch_handlers import torch_handlers
+
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
 logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
+
+def get_params(model, node_complexity_map):  # for each module check for hook? They can be registered like handles
+    total = 0
+    counted_params = set()
+    for name, module in model.named_modules():
+        if name in node_complexity_map:
+            param_scale = node_complexity_map[name].get('param_size', None)
+            if param_scale is None:
+                raise RuntimeError('Invalid compute_module_complexity() output')
+            for p in module.parameters():
+                if p.requires_grad:
+                    counted_params.add(p)
+                    total += p.numel() * param_scale
+    for p in model.parameters():
+        if p.requires_grad and p not in counted_params:
+            total += p.numel()
+    return total
+
+
+def get_macs(graph, node_complexity_map, reduction=sum):
+    results = dict()
+    for node in graph.nodes:
+        for operators, func in torch_handlers:
+            if isinstance(operators, str):
+                operators = [operators]
+            if node.operator in operators:
+                if node.scope in node_complexity_map:
+                    flops = node_complexity_map[node.scope].get('flops', None)
+                    if flops is None:
+                        raise RuntimeError('Invalid compute_module_complexity() output')
+                    results[node] = flops
+                elif func is not None:
+                    results[node] = func(node)
+                break
+        # else:
+        #     warnings.warn('No handlers found: "{}". Skipped.'.format(
+        #         node.operator))
+
+    if reduction is not None:
+        return reduction(results.values())
+    else:
+        return results
+
+def get_nodes(graph):
+    nodes = []
+    for i, node in enumerate(graph.nodes):
+        if 'aten' in node.operator: # aten ops
+            inputs = []
+            outputs = []
+            weights = []
+            bias = []
+            if 'conv' in node.operator:
+                weights = node.inputs[1].shape
+                if node.inputs[2].shape is not None:
+                    bias = node.inputs[2].shape
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
+            elif 'mm' in node.operator:
+                weights = node.inputs[2].shape
+                if node.inputs[0].shape is not None:
+                    bias = node.inputs[0].shape
+                inputs.append(Tensor(name=node.inputs[1].name,
+                        dtype=node.inputs[1].dtype, shape=node.inputs[1].shape, scope=node.scope))
+            elif 'matmul' in node.operator:
+                weights = node.inputs[1].shape
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
+            elif node.operator in ['aten::batch_norm', 'aten::instance_norm']:
+                if node.inputs[1].shape is not None:
+                    weights = node.inputs[1].shape # to double-chek
+                    bias = node.inputs[2].shape #
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
+            elif node.operator in ['aten::layer_norm', 'aten::group_norm']:
+                if node.inputs[2].shape is not None:
+                    weights = node.inputs[2].shape # to double-chek
+                    bias = node.inputs[2].shape # ???
+                inputs.append(Tensor(name=node.inputs[0].name,
+                        dtype=node.inputs[0].dtype, shape=node.inputs[0].shape, scope=node.scope))
+            elif node.operator == 'aten::t':  # skip weight transpose, shouldn't be present
+                continue
+            else:
+                for x in node.inputs:
+                    if x.shape is not None:
+                        if x.ndim > 1:
+                            inputs.append(Tensor(name=x.name, dtype=x.dtype,
+                                    shape=x.shape, scope=node.scope))
+            for x in node.outputs:
+                outputs.append(Tensor(name=x.name, dtype=x.dtype,
+                    shape=x.shape, scope=node.scope))
+
+            nodes.append(Layer(name="{}_{}".format(i, node.operator),
+                inputs=inputs, outputs=outputs, weights=weights, bias=bias, scope=node.scope))
+
+    return nodes
 
 
 class TorchProfiler(Profiler):
@@ -38,62 +137,56 @@ class TorchProfiler(Profiler):
 
 
 class ComputeComplexity(ProfilerFunction):
+    def __init__(self, export=False):
+        super().__init__()
+        self.export = export
+
     @classmethod
     def _get_bounded_status_keys_cls(cls):
-        return Flops, TotalParams, ModelSize, MemoryFootprint, LayerwiseSummary
+        return Flops, TotalParams, ModelSize, MemoryFootprint, LayerwiseSummary, LayerwiseData
 
     def get_bounded_status_keys(self):
         sk_cls = self._get_bounded_status_keys_cls()
         rval = tuple(cls() for cls in sk_cls)
         return rval
 
-    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU, include_weights=True):
+    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU,
+            include_weights=True):
         sk_cls = self._get_bounded_status_keys_cls()
-        rval = self._compute_complexity(model, data_splits['train'], batch_size=batch_size, device=device,
-                                        include_weights=include_weights)
+        rval = self._compute_complexity(model, data_splits['train'],
+                batch_size=batch_size, device=device,
+                include_weights=include_weights)
         assert len(sk_cls) == len(rval)
         return {x.NAME: y for x, y in zip(sk_cls, rval)}
 
-    # This is adapted from ptflops
-    # HAS TO RETURN A TUPLE IN THE SAME ORDER OF STATUSKEYS
-    def _compute_complexity(self, model, dataloader, batch_size=1, device=Device.CPU, include_weights=True):
-        temp_model = deepcopy(model)
-        forward_pass = dataloader.forward_pass
 
-        with torch.no_grad():
-            # synchronize gpu time and measure fp
-            temp_model = TorchProfiler.model_to_device(temp_model, device)
-            flops_model = flops_counter.add_flops_counting_methods(temp_model)
-            flops_model.eval()
+    def _compute_complexity(self, model, dataloader, batch_size=1,
+            device=Device.CPU, include_weights=True):
+        model.eval()
+        inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)
+        assert isinstance(inputs, tuple)
+        node_complexity_map = {}
+        graph = trace(model.cpu(), inputs, node_complexity_map)
+        aten_nodes = get_nodes(graph)
+        placer = Placer(aten_nodes)
+        aten_nodes = placer.place(num_bytes=4)
+        report = Report(aten_nodes, export=self.export, filename='outmodel') # filename
+        df = report.get_stats(verbose=self.export)
 
-            # DRY RUNS
-            for _ in range(5):
-                if device == Device.GPU:
-                    torch.cuda.synchronize()
-                    forward_pass.random_perform(flops_model, batch_size=batch_size, device=device)
+        params = get_params(model.cpu(), node_complexity_map)
+        macs = get_macs(graph, node_complexity_map)
+        macs /= 1e9
+        model_size = (params*4) / (2**20)
+        params /= 1e6
+        peak_memory = df.ram.max() / (2**20)
 
-            # Add hooks and start the run
-            flops_model.start_flops_count(ost=sys.stdout, verbose=False, ignore_list=[])
-            if device == Device.GPU:
-                torch.cuda.synchronize()
-
-            t0 = time.time()
-            forward_pass.random_perform(flops_model, batch_size=batch_size, device=device)
-            flops_count, params_count, model_size, activation_size, summary_str = \
-                flops_model.compute_average_flops_cost("", t0)
-
-            flops_model.stop_flops_count()
-
-        flops = flops_count / 1e9  # Giga Flops
-        params = params_count / 1e6  # Million Flops
-        model_size = abs(model_size / (1024 ** 2.))  # Convert bytes to MB
-        shapes_tuple = forward_pass.get_model_input_shapes()
-        total_input_size = abs(
-            np.prod(sum(shapes_tuple, ()))) * batch_size * 4  # Multiply with batch_size and bit precision
-        memory_footprint = abs((total_input_size + activation_size) / (1024 ** 2.))
-        total_memory_footprint = model_size + memory_footprint if include_weights else memory_footprint
-
-        return flops, params, model_size, total_memory_footprint, summary_str
+        keys = ['weight', 'input_shape', 'output_shape', 'scope', 'ram']
+        header = ['Weight', 'Input Shape','Output Shape', 'Scope', 'Memory']
+        df_str = df[keys].to_string(header=header, col_space=10, justify='right', max_colwidth=40)
+        ncols = df_str.find('\n') + 1
+        df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
+                df_str[ncols:] + '\n' + '-'*ncols + '\n'
+        return macs, params, model_size, peak_memory, df_str, df
 
 
 class ComputeExecutionTime(ProfilerFunction):

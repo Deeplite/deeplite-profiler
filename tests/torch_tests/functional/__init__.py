@@ -39,13 +39,20 @@ class FakeData:
     def __len__(self):
         return 1
 
-def get_profiler():
+def get_profiler(model_name=None, export=False):
     data = TorchProfiler.enable_forward_pass_data_splits(DATA)
-    profiler = TorchProfiler(MODEL, data)
-    profiler.register_profiler_function(ComputeComplexity())
+    if model_name == 'custom':
+        profiler = TorchProfiler(CUSTOM_MODEL, data)
+    elif model_name == 'coverage':
+        profiler = TorchProfiler(COVERAGE_MODEL, data)
+    else:
+        profiler = TorchProfiler(MODEL, data)
+
+    profiler.register_profiler_function(ComputeComplexity(export=export))
     profiler.register_profiler_function(ComputeExecutionTime())
     profiler.register_profiler_function(ComputeEvalMetric(get_missclass, 'missclass', unit_name='%'))
     return profiler
+
 
 if TORCH_AVAILABLE:
     import torch
@@ -59,6 +66,44 @@ if TORCH_AVAILABLE:
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2, stride=2),
         nn.Flatten(),
+    )
+
+    class CustomConv(nn.Conv2d):
+        def compute_module_complexity(self, inputs, outputs):
+            return dict(flops=0,
+                    param_size=2 / 8,
+                    activation_size=4 / 8)
+
+    CUSTOM_MODEL = nn.Sequential(
+        CustomConv(3, 32, kernel_size=5, stride=1, padding=2),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Flatten(),
+    )
+
+    class CoverageModule(nn.Module):
+        def forward(self, x):
+            a = torch.ones((10))
+            b = torch.ones((10,10))
+            c = torch.ones((10,10,10))
+
+            y = x * torch.ones((1, 10))
+            q = torch.matmul(torch.matmul(b,b), y.transpose(0,1))
+            r = (torch.matmul(a, b) + torch.matmul(b, a) + torch.matmul(a,a)).unsqueeze(1)
+            s = (torch.matmul(c,b) + torch.matmul(a,c) + torch.matmul(c,a)).sum((0,1)).unsqueeze(1)
+            return q + r + s
+
+    # linaer, matmul, matvec, multiplication, add, avg pool, upsample
+    COVERAGE_MODEL = nn.Sequential(
+        nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
+        nn.BatchNorm2d(32),
+        nn.ReLU(),
+
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Flatten(),
+        nn.LayerNorm((8192)),
+        nn.Linear(8192, 10),
+        CoverageModule()
     )
 
     DATA = {"train": FakeData(), "test": FakeData()}
