@@ -65,7 +65,12 @@ class TestTorchProfiler(BaseFunctionalTest):
     @mock.patch('deeplite.profiler.utils.AverageAggregator.get', return_value=2)
     def test_compute_network_status(self, *args):
         from deeplite.profiler import Device
-        device = Device.CPU
+
+        # test invalid device
+        with pytest.raises(ValueError):
+            Device('unknown device')
+
+        device = Device('CPU')
         batch_size = 1
         profiler = get_profiler()
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
