@@ -4,7 +4,7 @@ from tests.torch_tests.unit import BaseUnitTest, TORCH_AVAILABLE, get_profiler
 from unittest import mock
 
 @mock.patch("deeplite.torch_profiler.torch_profiler.ComputeComplexity._compute_complexity",
-            return_value=(1, 2, 3, 4, "summary_str"))
+            return_value=(1, 2, 3, 4, "summary_str", 'layer_data'))
 @mock.patch("deeplite.profiler.utils.AverageAggregator.get", return_value=(1))
 class TestTorchProfiler(BaseUnitTest):
     def test_compute_flops(self, *args):
