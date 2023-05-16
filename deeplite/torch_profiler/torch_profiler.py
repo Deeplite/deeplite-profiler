@@ -21,21 +21,30 @@ logger = getLogger(__name__)
 
 __all__ = ['TorchProfiler', 'ComputeComplexity', 'ComputeExecutionTime']
 
-def get_params(model, node_complexity_map):  # for each module check for hook? They can be registered like handles
+
+def get_total_params(model):
+    total = 0
+    for p in model.parameters():
+        if p.requires_grad:
+            total += p.numel()
+    return total
+
+
+def get_params(model, node_complexity_map, num_bytes):  # for each module check for hook? They can be registered like handles
     total = 0
     counted_params = set()
     for name, module in model.named_modules():
         if name in node_complexity_map:
-            param_scale = node_complexity_map[name].get('param_size', None)
-            if param_scale is None:
-                raise RuntimeError('Invalid compute_module_complexity() output')
-            for p in module.parameters():
-                if p.requires_grad:
+            param_size_map = node_complexity_map[name].get('param_size', None)
+            if param_size_map is not None:
+                assert isinstance(param_size_map, dict)
+                for p_name, param_size in param_size_map.items():
+                    p = getattr(module, p_name)
                     counted_params.add(p)
-                    total += p.numel() * param_scale
+                    total += p.numel() * param_size  # param_size = bytes per param
     for p in model.parameters():
         if p.requires_grad and p not in counted_params:
-            total += p.numel()
+            total += p.numel() * num_bytes
     return total
 
 
@@ -137,8 +146,9 @@ class TorchProfiler(Profiler):
 
 
 class ComputeComplexity(ProfilerFunction):
-    def __init__(self, export=False):
+    def __init__(self, num_bytes=4, export=False):
         super().__init__()
+        self.num_bytes = num_bytes
         self.export = export
 
     @classmethod
@@ -150,18 +160,16 @@ class ComputeComplexity(ProfilerFunction):
         rval = tuple(cls() for cls in sk_cls)
         return rval
 
-    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU,
-            include_weights=True):
+    def __call__(self, model, data_splits, batch_size=1, device=Device.CPU):
         sk_cls = self._get_bounded_status_keys_cls()
         rval = self._compute_complexity(model, data_splits['train'],
-                batch_size=batch_size, device=device,
-                include_weights=include_weights)
+                batch_size=batch_size, device=device)
         assert len(sk_cls) == len(rval)
         return {x.NAME: y for x, y in zip(sk_cls, rval)}
 
 
     def _compute_complexity(self, model, dataloader, batch_size=1,
-            device=Device.CPU, include_weights=True):
+            device=Device.CPU):
         model.eval()
         inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)
         assert isinstance(inputs, tuple)
@@ -169,24 +177,23 @@ class ComputeComplexity(ProfilerFunction):
         graph = trace(model.cpu(), inputs, node_complexity_map)
         aten_nodes = get_nodes(graph)
         placer = Placer(aten_nodes)
-        aten_nodes = placer.place(num_bytes=4)
+        aten_nodes = placer.place(num_bytes=self.num_bytes)
         report = Report(aten_nodes, export=self.export, filename='outmodel') # filename
         df = report.get_stats(verbose=self.export)
 
-        params = get_params(model.cpu(), node_complexity_map)
+        params_size = get_params(model.cpu(), node_complexity_map, num_bytes=self.num_bytes)
         macs = get_macs(graph, node_complexity_map)
         macs /= 1e9
-        model_size = (params*4) / (2**20)
-        params /= 1e6
-        peak_memory = df.ram.max() / (2**20)
-
+        model_size = (params_size) / (2**20)
+        total_params = get_total_params(model) / 1e6
+        peak_memory = df.ram.max() * self.num_bytes / (2**20) / batch_size
         keys = ['weight', 'input_shape', 'output_shape', 'scope', 'ram']
         header = ['Weight', 'Input Shape','Output Shape', 'Scope', 'Memory']
         df_str = df[keys].to_string(header=header, col_space=10, justify='right', max_colwidth=40)
         ncols = df_str.find('\n') + 1
         df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
                 df_str[ncols:] + '\n' + '-'*ncols + '\n'
-        return macs, params, model_size, peak_memory, df_str, df
+        return macs, total_params, model_size, peak_memory, df_str, df
 
 
 class ComputeExecutionTime(ProfilerFunction):

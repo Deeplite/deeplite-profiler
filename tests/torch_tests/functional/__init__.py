@@ -71,7 +71,7 @@ if TORCH_AVAILABLE:
     class CustomConv(nn.Conv2d):
         def compute_module_complexity(self, inputs, outputs):
             return dict(flops=0,
-                    param_size=2 / 8,
+                    param_size={'weight': 2 / 8},
                     activation_size=4 / 8)
 
     CUSTOM_MODEL = nn.Sequential(
