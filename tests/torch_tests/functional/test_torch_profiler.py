@@ -70,7 +70,7 @@ class TestTorchProfiler(BaseFunctionalTest):
 
         custom_profiler = get_profiler('custom')
         custom_profiler.compute_network_status()
-        assert custom_profiler.status_get('model_size') == old_size * 0.25
+        assert custom_profiler.status_get('model_size') == old_size - ((96*25) * (4 - 2/8) / (2**20))
         math.isclose(custom_profiler.status_get('flops'), old_flops - 2490368e-9)  # removed conv flops
 
     def test_handlers(self, *args):
@@ -89,16 +89,24 @@ class TestTorchProfiler(BaseFunctionalTest):
         batch_size = 1
         profiler = get_profiler()
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
-                                                 include_weights=True, print_mode='debug')
+                                                 print_mode='debug')
         # print(status['layerwise_summary'])
         assert(status['flops'] == 0.002555904)
         assert(status['total_params'] == 0.002432)
         assert(status['execution_time'] == 2000)
         assert(status['model_size'] == 0.00927734375)
-        assert(status['memory_footprint'] == 0.25)  # replaced by peak ram
+        assert(status['memory_footprint'] == 1.0)
         assert(status['eval_metric'] == 100)
         assert(status['layerwise_summary'])
         assert 'inference_time' in status
+
+        status2 = profiler.compute_network_status(batch_size=batch_size*2, device=device, short_print=False,
+                                                  print_mode='debug')
+        # assert independent of batch size
+        assert(status['flops'] == status2['flops'])
+        assert(status['total_params'] == status2['total_params'])
+        assert(status['model_size'] == status2['model_size'])
+        assert(status['memory_footprint'] == status2['memory_footprint'])
 
     @mock.patch('deeplite.profiler.metrics.Flops.get_comparative', return_value='coverage')
     def test_compare_profiles(self, *args):
