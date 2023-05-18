@@ -84,7 +84,7 @@ setup(
     package_data={
     'deeplite': ['deeplite-profiler.sig'],
     },
-    install_requires=["setuptools<65.6.0", "numpy>=1.17"],
+    install_requires=["setuptools<65.6.0", "numpy==1.19.5"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
