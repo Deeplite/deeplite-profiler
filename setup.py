@@ -61,7 +61,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 TORCH_RANGE = "torch>=1.4, <=1.8.1"
-DATA_PKGS = ["pandas=2.0.0", "matplotlib"]
+DATA_PKGS = ["pandas==2.0.0", "matplotlib"]
 EXTRAS_REQUIRE = {
     'torch': [TORCH_RANGE, "ptflops==0.6.2", *DATA_PKGS],
     'tf-gpu': ["tensorflow-gpu==1.14; python_version <= '3.7.10'", "protobuf==3.19.*", *DATA_PKGS],
