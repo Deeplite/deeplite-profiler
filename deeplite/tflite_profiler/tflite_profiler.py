@@ -33,34 +33,15 @@ class ComputeFlops(ProfilerFunction):
         return Flops()
 
     def __call__(self, model, data_splits, batch_size=1, device=Device.CPU, include_weights=True):
-        temp_model = model
+        temp_model = tflite.Model.GetRootAsModel(model, 0)
 
         with tf.device('gpu' if device == Device.GPU else 'cpu'):
             return self._compute_flops(temp_model)
 
-    # HAS TO RETURN A TUPLE IN THE SAME ORDER OF STATUSKEYS
     def _compute_flops(self, model):
             graph = model.Subgraphs(0)
-            # help(tflite.BuiltinOperator)
-            # ABS = 101
-            # CONV_2D = 3
-            # CUMSUM = 128
-
-            # print funcs
-            _dict_builtin_op_code_to_name = {v: k for k, v in  tflite.BuiltinOperator.__dict__.items() if type(v) == int}
-            def print_header():
-                print("%-18s | M FLOPS" % ("OP_NAME"))
-                print("------------------------------")
-            def print_flops(op_code_builtin, flops):
-                print("%-18s | %.1f" % (_dict_builtin_op_code_to_name[op_code_builtin], flops / 1.0e6))
-            def print_none(op_code_builtin):
-                print("%-18s | <IGNORED>" % (_dict_builtin_op_code_to_name[op_code_builtin]))
-            def print_footer(total_flops):
-                print("------------------------------")
-                print("Total: %.1f M FLOPS" % (total_flops / 1.0e6))
 
             total_flops = 0.0
-            print_header()
             for i in range(graph.OperatorsLength()):
                 op = graph.Operators(i)
                 op_code = model.OperatorCodes(op.OpcodeIndex())
@@ -84,7 +65,6 @@ class ComputeFlops(ProfilerFunction):
                     # flops. 2x means mul(1)+add(1). 2x not needed if you calculate MACCs
                     # refer to https://github.com/AlexeyAB/darknet/src/convolutional_layer.c `l.blopfs =`
                     flops = 2 * out_shape[1] * out_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
-                    #print_flops(op_code_builtin, flops)
 
                 elif op_code_builtin == tflite.BuiltinOperator.DEPTHWISE_CONV_2D:
                     in_shape = graph.Tensors( op.Inputs(0) ).ShapeAsNumpy()
@@ -92,11 +72,7 @@ class ComputeFlops(ProfilerFunction):
                     out_shape = graph.Tensors( op.Outputs(0) ).ShapeAsNumpy()
                     # flops
                     flops = 2 * out_shape[1] * out_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
-                    #print_flops(op_code_builtin, flops)
-
-                #else:
-                    #print_none(op_code_builtin)
 
                 total_flops += flops
-            #print_footer(total_flops)
+
             return total_flops / 1e9 
