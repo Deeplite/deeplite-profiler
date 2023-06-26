@@ -42,44 +42,55 @@ class ComputeFlops(ProfilerFunction):
             return self._compute_flops(temp_model)
 
     def _compute_flops(self, model):
-            graph = model.Subgraphs(0)
+        subgraph = model.Subgraphs(0)
+        total_flops = 0.0
 
-            total_flops = 0.0
-            for i in range(graph.OperatorsLength()):
-                op = graph.Operators(i)
-                op_code = model.OperatorCodes(op.OpcodeIndex())
-                op_code_builtin = op_code.BuiltinCode()
+        for op_idx in range(subgraph.OperatorsLength()):
+            op = subgraph.Operators(op_idx)
+            op_code = model.OperatorCodes(op.OpcodeIndex()).BuiltinCode()
 
-                op_opt = op.BuiltinOptions()
+            flops = 0.0
 
-                flops = 0.0
-                if op_code_builtin == tflite.BuiltinOperator.CONV_2D:
-                    # input shapes: in, weight, bias
-                    in_shape = graph.Tensors( op.Inputs(0) ).ShapeAsNumpy()
-                    filter_shape = graph.Tensors( op.Inputs(1) ).ShapeAsNumpy()
-                    bias_shape = graph.Tensors( op.Inputs(2) ).ShapeAsNumpy()
-                    # output shape
-                    out_shape = graph.Tensors( op.Outputs(0) ).ShapeAsNumpy()
-                    # ops options
-                    opt = tflite.Conv2DOptions()
-                    opt.Init(op_opt.Bytes, op_opt.Pos)
-                    # opt.StrideH()
+            if op_code == tflite.BuiltinOperator.CONV_2D:
+                # Convolutional layer
+                input_tensor = subgraph.Tensors(op.Inputs(0))
+                weight_tensor = subgraph.Tensors(op.Inputs(1))
+                bias_tensor = subgraph.Tensors(op.Inputs(2))
+                output_tensor = subgraph.Tensors(op.Outputs(0))
 
-                    # flops. 2x means mul(1)+add(1). 2x not needed if you calculate MACCs
-                    # refer to https://github.com/AlexeyAB/darknet/src/convolutional_layer.c `l.blopfs =`
-                    flops = 2 * out_shape[1] * out_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
+                input_shape = np.array(input_tensor.ShapeAsNumpy())
+                filter_shape = np.array(weight_tensor.ShapeAsNumpy())
+                output_shape = np.array(output_tensor.ShapeAsNumpy())
 
-                elif op_code_builtin == tflite.BuiltinOperator.DEPTHWISE_CONV_2D:
-                    in_shape = graph.Tensors( op.Inputs(0) ).ShapeAsNumpy()
-                    filter_shape = graph.Tensors( op.Inputs(1) ).ShapeAsNumpy()
-                    out_shape = graph.Tensors( op.Outputs(0) ).ShapeAsNumpy()
-                    # flops
-                    flops = 2 * out_shape[1] * out_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
+                flops = 2 * output_shape[1] * output_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
 
-                total_flops += flops
+            elif op_code == tflite.BuiltinOperator.DEPTHWISE_CONV_2D:
+                # Depthwise convolutional layer
+                input_tensor = subgraph.Tensors(op.Inputs(0))
+                weight_tensor = subgraph.Tensors(op.Inputs(1))
+                output_tensor = subgraph.Tensors(op.Outputs(0))
 
-            return total_flops / 1e9 
+                input_shape = np.array(input_tensor.ShapeAsNumpy())
+                filter_shape = np.array(weight_tensor.ShapeAsNumpy())
+                output_shape = np.array(output_tensor.ShapeAsNumpy())
 
+                flops = 2 * output_shape[1] * output_shape[2] * filter_shape[0] * filter_shape[1] * filter_shape[2] * filter_shape[3]
+
+            elif op_code == tflite.BuiltinOperator.FULLY_CONNECTED:
+                # Linear (fully connected) layer
+                input_tensor = subgraph.Tensors(op.Inputs(0))
+                weight_tensor = subgraph.Tensors(op.Inputs(1))
+                bias_tensor = subgraph.Tensors(op.Inputs(2))
+                output_tensor = subgraph.Tensors(op.Outputs(0))
+
+                input_shape = np.array(input_tensor.ShapeAsNumpy())
+                weight_shape = np.array(weight_tensor.ShapeAsNumpy())
+
+                flops = 2 * input_shape[1] * weight_shape[0]
+
+            total_flops += flops
+
+        return total_flops / 1e9
 
 class ComputeParams(ProfilerFunction):
     def get_bounded_status_keys(self):
