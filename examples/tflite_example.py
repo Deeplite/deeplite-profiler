@@ -3,6 +3,8 @@ import sys
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.framework import graph_util
+from tensorflow.lite.python import lite
 import tflite
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -31,12 +33,33 @@ test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)) \
         .batch(1)
 data_splits = {'train': train_dataset, 'test': test_dataset}
 
-with open("models/cifar10.tflite", "rb") as f:
-	native_teacher = f.read()
+
+# Define the input and output shapes
+input_shape = (1, 32, 32, 3)
+
+# Create a TensorFlow graph
+graph = tf.Graph()
+with graph.as_default():
+    preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input#tf.keras.applications.vgg19.preprocess_input
+    # Create the input and output tensors
+    input_tensor = tf.placeholder(tf.float32, shape=input_shape, name='input')
+
+    output_tensor = tf.identity(input_tensor, name='output')
+
+    # Convert the graph to a TensorFlow Lite model
+    converter = tf.lite.TFLiteConverter.from_session(sess=tf.Session(graph=graph),
+                                                     input_tensors=[input_tensor],
+                                                     output_tensors=[output_tensor])
+    tflite_model = converter.convert()
+
+#with open("models/cifar10.tflite", "rb") as f:
+#   tflite_model = f.read()
 # Step 2: Create Profiler class and register the profiling functions
 data_loader = TFLiteProfiler.enable_forward_pass_data_splits(data_splits)
-profiler = TFLiteProfiler(native_teacher, data_loader, name="Original Model")
+profiler = TFLiteProfiler(tflite_model, data_loader, name="Original Model")
 profiler.register_profiler_function(ComputeFlops())
+profiler.register_profiler_function(ComputeSize())
+profiler.register_profiler_function(ComputeParams())
 profiler.register_profiler_function(ComputeEvalMetric(get_accuracy, 'accuracy', unit_name='%'))
 #
 ## Step 3: Compute the registered profiler metrics for the tflite Model
