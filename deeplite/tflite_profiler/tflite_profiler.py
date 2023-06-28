@@ -92,6 +92,7 @@ class ComputeFlops(ProfilerFunction):
 
         return total_flops / 1e9
 
+
 class ComputeParams(ProfilerFunction):
     def get_bounded_status_keys(self):
         return TotalParams()

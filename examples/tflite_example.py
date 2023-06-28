@@ -34,26 +34,46 @@ test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test)) \
 data_splits = {'train': train_dataset, 'test': test_dataset}
 
 
-# Define the input and output shapes
-input_shape = (1, 32, 32, 3)
+def make_model():
+    # Create a TensorFlow graph
+    graph = tf.Graph()
+    with graph.as_default():
+        input_shape = (1, 32, 32, 3)
 
-# Create a TensorFlow graph
-graph = tf.Graph()
-with graph.as_default():
-    preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input#tf.keras.applications.vgg19.preprocess_input
-    # Create the input and output tensors
-    input_tensor = tf.placeholder(tf.float32, shape=input_shape, name='input')
+        # Create the input tensor
+        input_tensor = tf.placeholder(tf.float32, shape=input_shape, name='input')
 
-    output_tensor = tf.identity(input_tensor, name='output')
+        # Create the fully connected layer with one unit
+        fc_weights = tf.Variable(tf.random_normal([input_shape[1]*input_shape[2]*input_shape[3], 100]), name='fc_weights')
+        fc_biases = tf.Variable(tf.random_normal([1]), name='fc_biases')
 
-    # Convert the graph to a TensorFlow Lite model
-    converter = tf.lite.TFLiteConverter.from_session(sess=tf.Session(graph=graph),
-                                                     input_tensors=[input_tensor],
-                                                     output_tensors=[output_tensor])
-    tflite_model = converter.convert()
+        # Initialize the variables
+        init_op = tf.global_variables_initializer()
 
-#with open("models/cifar10.tflite", "rb") as f:
-#   tflite_model = f.read()
+        # Create the session
+        with tf.Session() as sess:
+            # Run the initialization operation
+            sess.run(init_op)
+
+            flatten = tf.reshape(input_tensor, [-1, input_shape[1]*input_shape[2]*input_shape[3]])
+            fc_output = tf.add(tf.matmul(flatten, fc_weights), fc_biases, name='fc_output')
+
+            # Create the output tensor
+            output_tensor = tf.identity(fc_output, name='output')
+
+            # Convert the model to TFLite
+            converter = tf.lite.TFLiteConverter.from_session(
+                sess=sess,
+                input_tensors=[input_tensor],
+                output_tensors=[output_tensor]
+            )
+            tflite_model = converter.convert()
+
+    return tflite_model
+
+tflite_model = make_model()
+
+
 # Step 2: Create Profiler class and register the profiling functions
 data_loader = TFLiteProfiler.enable_forward_pass_data_splits(data_splits)
 profiler = TFLiteProfiler(tflite_model, data_loader, name="Original Model")
