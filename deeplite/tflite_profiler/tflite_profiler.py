@@ -88,6 +88,14 @@ class ComputeFlops(ProfilerFunction):
 
                 flops = 2 * input_shape[1] * weight_shape[0]
 
+            elif op_code in [tflite.BuiltinOperator.ADD, tflite.BuiltinOperator.AVERAGE_POOL_2D,
+                             tflite.BuiltinOperator.CONCATENATION, tflite.BuiltinOperator.DEQUANTIZE,
+                             tflite.BuiltinOperator.MAX_POOL_2D, tflite.BuiltinOperator.MUL,
+                             tflite.BuiltinOperator.RESHAPE, tflite.BuiltinOperator.SOFTMAX,
+                             tflite.BuiltinOperator.SPLIT, tflite.BuiltinOperator.SUB,
+                             tflite.BuiltinOperator.TANH]:
+                flops = 0.0
+
             total_flops += flops
 
         return total_flops / 1e9
