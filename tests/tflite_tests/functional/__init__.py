@@ -69,8 +69,8 @@ def make_model():
 
 class TFLITE_FakeData:
     def __init__(self):       
-        self.x = np.float32(np.random.rand(1, 32, 32, 3)) #tf.Variable(tf.random.normal([10, 224, 224, 3]))
-        self.y = np.int32(np.random.rand(1, 1)) #tf.Variable(tf.random.normal([10, 1]))
+        self.x = np.float32(np.random.rand(1, 32, 32, 3))
+        self.y = np.int32(np.random.rand(1, 1))
 
     def __iter__(self):
         for x, y in zip(self.x, self.y):            
@@ -86,9 +86,6 @@ def get_profiler():
     profiler.register_profiler_function(ComputeSize())
     profiler.register_profiler_function(ComputeParams())
     profiler.register_profiler_function(ComputeEvalMetric(get_accuracy, 'accuracy', unit_name='%'))
-    #profiler.register_profiler_function(ComputeLayerwiseSummary())
-    #profiler.register_profiler_function(ComputeExecutionTime())
-    #profiler.register_profiler_function(ComputeEvalMetric(get_missclass, 'missclass', unit_name='%'))
     return profiler
 
 
