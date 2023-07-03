@@ -5,10 +5,9 @@ from unittest import mock
 from deeplite.profiler.evaluate import EvaluationFunction
 from deeplite.profiler import ComputeEvalMetric
 from deeplite.profiler.metrics import Comparative
-from tests.tflite_tests.functional import BaseFunctionalTest, TENSORFLOW_SUPPORTED, TENSORFLOW_AVAILABLE, get_profiler, make_model
+from tests.tflite_tests.functional import BaseFunctionalTest, get_profiler, make_model
 
 
-@pytest.mark.skipif(not TENSORFLOW_SUPPORTED, reason="Tensorflow not supported for Python 3.8+")
 class TestTFLITEProfiler(BaseFunctionalTest):
     def test_empty_display_status(self, *args):
         profiler = get_profiler()
