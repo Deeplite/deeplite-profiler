@@ -100,6 +100,8 @@ if TENSORFLOW_AVAILABLE and TENSORFLOW_SUPPORTED:
     
     from deeplite.profiler import ComputeEvalMetric
     from deeplite.tflite_profiler.tflite_profiler import *
+    from deeplite.tflite_profiler.flops.compute_flops import ComputeFlops
+
     from deeplite.tflite_profiler.tflite_inference import get_accuracy
 
     MODEL = make_model()

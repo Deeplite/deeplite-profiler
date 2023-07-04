@@ -16,6 +16,8 @@ except Exception:
 from deeplite.profiler import ComputeEvalMetric, Device
 from deeplite.tflite_profiler.tflite_inference import get_accuracy
 from deeplite.tflite_profiler.tflite_profiler import *
+from deeplite.tflite_profiler.flops.compute_flops import ComputeFlops
+
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
