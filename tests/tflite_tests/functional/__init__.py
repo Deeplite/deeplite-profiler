@@ -49,7 +49,7 @@ def make_model():
         flatten = tf.keras.layers.Flatten()(depthwise_conv_output)
 
         # Create the fully connected layer with one unit
-        fc_weights = tf.Variable(tf.random_normal([32768, 1], dtype=tf.float32), name='fc_weights')
+        fc_weights = tf.Variable(tf.random_normal([int(flatten.shape[1]), 1], dtype=tf.float32), name='fc_weights')
         fc_biases = tf.Variable(tf.random_normal([1], dtype=tf.float32), name='fc_biases')
 
         # Initialize the variables
