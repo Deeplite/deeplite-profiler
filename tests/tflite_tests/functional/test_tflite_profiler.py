@@ -17,9 +17,11 @@ class TestTFLITEProfiler(BaseFunctionalTest):
         from deeplite.profiler import Device
         device = Device.CPU
         batch_size = 1
+        def transform(x, y):
+            return x, y
         profiler = get_profiler()
         status = profiler.compute_network_status(batch_size=batch_size, device=device, short_print=False,
-                                                 include_weights=True, print_mode='debug')
+                                                 include_weights=True, print_mode='debug', transform=transform)
         assert(status['flops'] == 0.00235936)
         assert(status['total_params'] == 0.102562)
         assert(abs(status['model_size'] - 0.137097) < 1e-3)
