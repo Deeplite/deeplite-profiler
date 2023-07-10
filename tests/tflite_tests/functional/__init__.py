@@ -39,8 +39,17 @@ def make_model():
         # Create the input tensor
         input_tensor = tf.placeholder(tf.float32, shape=input_shape, name='input')
 
+        # Add Conv2D layer
+        conv_output = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu', padding='same')(input_tensor)
+
+        # Add DEPTHWISE_CONV_2D layer
+        depthwise_conv_output = tf.keras.layers.DepthwiseConv2D(kernel_size=(3, 3), activation='relu', padding='same')(conv_output)
+
+        # Flatten the output of Conv2D layer
+        flatten = tf.keras.layers.Flatten()(depthwise_conv_output)
+
         # Create the fully connected layer with one unit
-        fc_weights = tf.Variable(tf.random_normal([input_shape[1]*input_shape[2]*input_shape[3], 1]), name='fc_weights')
+        fc_weights = tf.Variable(tf.random_normal([flatten.shape[1], 1]), name='fc_weights')
         fc_biases = tf.Variable(tf.random_normal([1]), name='fc_biases')
 
         # Initialize the variables
@@ -51,7 +60,6 @@ def make_model():
             # Run the initialization operation
             sess.run(init_op)
 
-            flatten = tf.reshape(input_tensor, [-1, input_shape[1]*input_shape[2]*input_shape[3]])
             fc_output = tf.add(tf.matmul(flatten, fc_weights), fc_biases, name='fc_output')
 
             # Create the output tensor
