@@ -25,6 +25,6 @@ class TestTFLITEProfiler(BaseFunctionalTest):
         assert(status['flops'] == 0.00235936)
         assert(status['total_params'] == 0.102562)
         assert(abs(status['model_size'] - 0.137097) < 1e-3)
-        assert(status['memory_footprint'] == 0.410248)
+        assert(status['memory_footprint'] == 0.262144)
         assert(status['eval_metric'] == 100)
         assert 'inference_time' in status

@@ -90,5 +90,5 @@ class ComputeSize(ProfilerFunction):
             tensor_size = np.prod(tensor_shape) * np.dtype(tensor_dtype).itemsize
             tensor_sizes.append(tensor_size)
 
-        memory_footprint = sum(tensor_sizes)/ 1e6
+        memory_footprint = 2 * max(tensor_sizes) / 1e6
         return model_size, memory_footprint
