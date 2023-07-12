@@ -85,6 +85,6 @@ profiler.register_profiler_function(ComputeParams())
 profiler.register_profiler_function(ComputeEvalMetric(get_accuracy, 'accuracy', unit_name='%'))
 #
 ## Step 3: Compute the registered profiler metrics for the tflite Model
-profiler.compute_network_status(batch_size=1, device=Device.CPU, short_print=False,
+profiler.compute_network_status(batch_size=1, device=Device.GPU, short_print=False,
                                                  include_weights=True, print_mode='info', k=1)
 # k for top k accuracy
