@@ -56,5 +56,5 @@ profiler.register_profiler_function(ComputeExecutionTime())
 profiler.register_profiler_function(ComputeEvalMetric(get_accuracy, 'accuracy', unit_name='%'))
 
 # Step 3: Compute the registered profiler metrics for the Tensorflow Keras Model
-profiler.compute_network_status(batch_size=1, device=Device.GPU, short_print=False,
+profiler.compute_network_status(batch_size=1, device=Device.CPU, short_print=False,
                                                  include_weights=True, print_mode='info')
