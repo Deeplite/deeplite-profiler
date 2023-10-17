@@ -10,10 +10,10 @@ from deeplite.profiler.utils import AverageAggregator, Device
 from deeplite.profiler.formatter import getLogger
 
 from deeplite.torch_profiler.torch_trace import trace
+from deeplite.torch_profiler.torch_handlers import torch_handlers
 from deeplite.profiler.ir import Layer, Tensor
 from deeplite.profiler.memory_allocation.placer import Placer
 from deeplite.profiler.report import Report
-from deeplite.torch_profiler.torch_handlers import torch_handlers
 
 from .torch_data_loader import TorchDataLoader, TorchForwardPass
 
@@ -174,14 +174,15 @@ class ComputeComplexity(ProfilerFunction):
         inputs = dataloader.forward_pass.create_random_model_inputs(batch_size)
         assert isinstance(inputs, tuple)
         node_complexity_map = {}
-        graph = trace(model.cpu(), inputs, node_complexity_map)
+        TorchProfiler.model_to_device(model, Device.CPU)
+        graph = trace(model, inputs, node_complexity_map)
         aten_nodes = get_nodes(graph)
         placer = Placer(aten_nodes)
         aten_nodes = placer.place(num_bytes=self.num_bytes)
         report = Report(aten_nodes, export=self.export, filename='outmodel') # filename
         df = report.get_stats(verbose=self.export)
 
-        params_size = get_params(model.cpu(), node_complexity_map, num_bytes=self.num_bytes)
+        params_size = get_params(model, node_complexity_map, num_bytes=self.num_bytes)
         macs = get_macs(graph, node_complexity_map)
         macs /= 1e9
         model_size = (params_size) / (2**20)
@@ -193,6 +194,7 @@ class ComputeComplexity(ProfilerFunction):
         ncols = df_str.find('\n') + 1
         df_str = '-'*ncols + '\n' + df_str[:ncols] + '='*ncols + '\n' + \
                 df_str[ncols:] + '\n' + '-'*ncols + '\n'
+        TorchProfiler.model_to_device(model, device)
         return macs, total_params, model_size, peak_memory, df_str, df
 
 

@@ -60,7 +60,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 with open('LICENSE') as f:
     license = f.read()
 
-TORCH_RANGE = "torch>=1.4, <=1.8.1"
+TORCH_RANGE = "torch>=1.4, <=1.13"
 TFLITE = "tflite==1.14; python_version <= '3.7.10'"
 DATA_PKGS = ["pandas<=1.4.4", "matplotlib"]
 EXTRAS_REQUIRE = {
@@ -85,7 +85,7 @@ setup(
     package_data={
     'deeplite': ['deeplite-profiler.sig'],
     },
-    install_requires=["setuptools<65.6.0", "numpy==1.19.5"],
+    install_requires=["setuptools<65.6.0", "numpy==1.20.0"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',

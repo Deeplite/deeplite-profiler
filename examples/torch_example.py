@@ -8,26 +8,23 @@ from deeplite.torch_profiler.torch_profiler import (ComputeComplexity,
                                                     ComputeExecutionTime,
                                                     TorchProfiler)
 from deeplite_torch_zoo import get_data_splits_by_name, get_model_by_name
+from deeplite_torch_zoo import get_dataloaders, get_model
+
+
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 # Step 1: Define native pytorch dataloaders and model
 # 1a. data_splits = {"train": train_dataloder, "test": test_dataloader}
-data_splits = get_data_splits_by_name(
-    data_root='',
+data_splits = get_dataloaders(
     dataset_name='cifar100',
-    model_name='resnet18',
-    batch_size=128,
-    num_workers=4,
+    data_root='/neutrino/datasets/cifar100',
+    img_size=224,
+    batch_size=64
 )
 
-# 1b. Load the native Pytorch model
-model = get_model_by_name(
-    model_name='resnet18',
-    dataset_name='cifar100',
-    pretrained=True,
-    progress=True
-)
+# # 1b. Load the native Pytorch model
+model = get_model('resnet18', 'cifar100', pretrained=True)
 
 
 # Step 2: Create Profiler class and register the profiling functions
