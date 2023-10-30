@@ -186,7 +186,7 @@ class ForwardPass(ABC):
         return 'dummy', True
 
     def __init__(self, model_input_pattern=None, expecting_common_inputs=True):
-        if isinstance(model_input_pattern, tuple):
+        if isinstance(model_input_pattern, tuple) and not isinstance(model_input_pattern, ModelInputPattern):
             model_input_pattern = ModelInputPattern(model_input_pattern)
         self.mip = model_input_pattern
         self.expecting_common_inputs = expecting_common_inputs
