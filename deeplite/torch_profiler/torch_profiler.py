@@ -184,7 +184,7 @@ class ComputeComplexity(ProfilerFunction):
 
         params_size = get_params(model, node_complexity_map, num_bytes=self.num_bytes)
         macs = get_macs(graph, node_complexity_map)
-        macs /= 1e9
+        macs /= batch_size * 1e9
         model_size = (params_size) / (2**20)
         total_params = get_total_params(model) / 1e6
         peak_memory = df.ram.max() * self.num_bytes / (2**20) / batch_size
